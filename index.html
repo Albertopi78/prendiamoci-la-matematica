@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+
+<html lang="it">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
+<title>Prendiamoci la matematica</title>
+<meta content="La matematica delle AI generative, da provare con le mani. Una serie di Slow News." name="description"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&amp;family=Figtree:wght@400;500;600;700&amp;family=Literata:ital,opsz,wght@0,7..72,400;1,7..72,400&amp;display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --pagina:#FAF8E8; --card:#FFFEF6; --giallo:#F0EDBA; --rosso:#D02D39; --rosso-scuro:#A81F2A; --sul-rosso:#FFF9E8;
+  --inchiostro:#2B1215; --tenue:#6E5657; --bordo:rgba(43,18,21,.13); --bordo-forte:rgba(43,18,21,.3);
+  --scena:#2B1215; --scena-linea:rgba(240,237,186,.12); --scena-cornice:rgba(240,237,186,.38); --scena-testo:#F0EDBA; --scena-rosso:#EF5A65; --scena-tinta:rgba(239,90,101,.2);
+  --vetro:rgba(30,12,14,.72);
+  --titoli:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --ui:"Figtree","Segoe UI",system-ui,-apple-system,sans-serif;
+  --lettura:"Literata",Georgia,serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --pagina:#170B0C; --card:#22120F; --giallo:rgba(240,237,186,.13); --rosso:#E44854; --rosso-scuro:#F06470; --sul-rosso:#FFF9E8;
+    --inchiostro:#F0EDBA; --tenue:#BDB08E; --bordo:rgba(240,237,186,.14); --bordo-forte:rgba(240,237,186,.32);
+    --scena:#0E0607; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --pagina:#170B0C; --card:#22120F; --giallo:rgba(240,237,186,.13); --rosso:#E44854; --rosso-scuro:#F06470; --sul-rosso:#FFF9E8;
+  --inchiostro:#F0EDBA; --tenue:#BDB08E; --bordo:rgba(240,237,186,.14); --bordo-forte:rgba(240,237,186,.32);
+  --scena:#0E0607; color-scheme:dark;
+}
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+*,*::before,*::after{ box-sizing:inherit; }
+html{ scroll-padding-top:calc(env(safe-area-inset-top,0px) + 4rem); }
+body{ margin:0; background:var(--pagina); color:var(--inchiostro); font-family:var(--ui); font-size:1rem; line-height:1.5; -webkit-font-smoothing:antialiased; }
+[hidden]{ display:none !important; }
+button{ font:inherit; color:inherit; cursor:pointer; }
+a{ color:inherit; }
+:focus-visible{ outline:3px solid var(--rosso); outline-offset:2px; }
+svg.i{ width:1.25em; height:1.25em; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex:none; }
+.col{ max-width:780px; margin:0 auto; padding:0 1rem; }
+
+/* testata */
+.testata{ position:sticky; top:0; z-index:20; background:var(--pagina); border-bottom:1px solid var(--bordo); }
+body::before{ content:""; position:fixed; inset:0 0 auto; height:env(safe-area-inset-top,0px); background:var(--pagina); z-index:30; }
+.barra{ display:flex; align-items:center; gap:.75rem; padding:.7rem 0; }
+.marchio{ display:flex; align-items:center; gap:.65rem; text-decoration:none; margin-right:auto; }
+.marchio .logo{ width:38px; height:38px; border-radius:11px; background:var(--rosso); color:var(--sul-rosso); display:grid; place-items:center; font-family:var(--titoli); font-weight:800; font-size:1.25rem; }
+.marchio b{ font-family:var(--titoli); font-weight:700; font-size:1.1rem; letter-spacing:-.01em; line-height:1.1; }
+.marchio b span{ color:var(--rosso); }
+.tondo{ width:42px; height:42px; border-radius:12px; border:1px solid var(--bordo-forte); background:var(--card); display:grid; place-items:center; }
+.tondo:hover{ background:var(--giallo); }
+.schede{ display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:4px; padding:4px; margin:0 0 .7rem; background:var(--giallo); border-radius:14px; }
+.schede button{ display:flex; align-items:center; justify-content:center; gap:.4rem; border:0; background:transparent; border-radius:10px; padding:.55rem .2rem; font-weight:600; font-size:.95rem; color:var(--tenue); }
+.schede button[aria-selected="true"]{ background:var(--card); color:var(--inchiostro); box-shadow:0 1px 3px rgba(43,18,21,.12); }
+
+/* titoli */
+.capo{ padding:1.3rem 0 .9rem; }
+.capo h1{ font-family:var(--titoli); font-weight:800; font-size:clamp(2rem,7vw,2.9rem); letter-spacing:-.035em; line-height:1; margin:0; }
+.capo h1::after{ content:"."; color:var(--rosso); }
+.capo p{ margin:.5rem 0 0; color:var(--tenue); font-size:1.02rem; }
+
+/* scelta modello */
+.modelli{ display:grid; grid-template-columns:1fr 1fr; gap:.5rem; margin-bottom:.8rem; }
+.modello{ display:flex; align-items:center; gap:.6rem; text-align:left; border:1.5px solid var(--bordo); background:var(--card); border-radius:16px; padding:.55rem .6rem; min-width:0; }
+.modello .ic{ width:40px; height:40px; flex:none; border-radius:11px; display:grid; place-items:center; background:var(--giallo); color:var(--rosso); }
+.modello b{ display:block; font-weight:700; font-size:1rem; }
+.modello small{ color:var(--tenue); font-size:.88rem; }
+.modello[aria-pressed="true"]{ border:2px solid var(--rosso); background:var(--giallo); }
+.modello[aria-pressed="true"] .ic{ background:var(--rosso); color:var(--sul-rosso); }
+
+/* scena */
+.scena{ position:relative; background:var(--scena); border-radius:22px 22px 0 0; overflow:hidden; color:var(--scena-testo); }
+.scena canvas{ display:block; width:100%; aspect-ratio:1/1; touch-action:manipulation; }
+.scena.bassa canvas{ aspect-ratio:1/1; }
+@media (min-width:620px){ .scena.bassa canvas{ aspect-ratio:4/3; } }
+.scena .nome{ position:absolute; left:1rem; top:.85rem; pointer-events:none; }
+.scena .nome b{ display:block; font-weight:700; font-size:1.05rem; }
+.scena .nome i{ font-family:var(--lettura); font-size:.95rem; opacity:.75; }
+.pillola{ position:absolute; right:.8rem; top:.8rem; display:flex; align-items:center; gap:.45rem; background:var(--vetro); border:1px solid var(--scena-cornice); padding:.35rem .75rem; border-radius:999px; font-weight:600; font-size:.9rem; pointer-events:none; }
+.pillola i{ width:.6rem; height:.6rem; border-radius:50%; background:var(--scena-cornice); }
+.pillola.accesa i{ background:var(--scena-rosso); box-shadow:0 0 0 3px rgba(239,90,101,.25); }
+.lettura{ position:absolute; right:.8rem; bottom:2.9rem; background:var(--vetro); border:1px solid var(--scena-cornice); padding:.3rem .7rem; border-radius:10px; font-weight:600; font-variant-numeric:tabular-nums; font-size:.95rem; pointer-events:none; }
+.comandi{ position:absolute; left:.8rem; bottom:2.7rem; display:flex; gap:2px; background:var(--vetro); border:1px solid var(--scena-cornice); border-radius:14px; padding:3px; }
+.comandi button{ width:42px; height:40px; border:0; background:transparent; color:var(--scena-testo); border-radius:11px; display:grid; place-items:center; }
+.comandi button:hover{ background:rgba(240,237,186,.12); }
+.suggerimento{ position:absolute; left:0; right:0; bottom:0; padding:.55rem 1rem .65rem; font-size:.88rem; display:flex; align-items:center; gap:.45rem; background:linear-gradient(transparent, rgba(20,8,9,.6)); pointer-events:none; }
+.formule{ background:var(--giallo); border-radius:14px; padding:.6rem .9rem; margin:0 0 .5rem; font-family:var(--lettura); font-size:1.02rem; line-height:1.65; }
+
+/* strumenti */
+.attrezzi{ background:var(--card); border:1px solid var(--bordo); border-top:0; border-radius:0 0 22px 22px; padding:.5rem; margin-bottom:.9rem; }
+.strumenti{ display:grid; grid-auto-flow:column; grid-auto-columns:1fr; gap:4px; }
+.strumenti button{ display:flex; flex-direction:column; align-items:center; gap:.25rem; border:1.5px solid transparent; background:transparent; border-radius:14px; padding:.55rem .15rem .5rem; font-weight:600; font-size:.88rem; color:var(--tenue); }
+.strumenti button svg{ width:1.55rem; height:1.55rem; }
+.strumenti button[aria-pressed="true"]{ background:var(--giallo); border-color:var(--rosso); color:var(--inchiostro); }
+.strumenti button[aria-pressed="true"] svg{ color:var(--rosso); }
+.extra{ display:flex; flex-wrap:wrap; gap:.4rem; padding:.55rem .25rem .2rem; border-top:1px solid var(--bordo); margin-top:.45rem; }
+.chip{ display:inline-flex; align-items:center; gap:.4rem; border:1px solid var(--bordo-forte); background:var(--card); border-radius:11px; padding:.42rem .7rem; font-weight:600; font-size:.92rem; }
+.chip[aria-pressed="true"]{ background:var(--inchiostro); color:var(--pagina); border-color:var(--inchiostro); }
+
+/* scheda contestuale */
+.scheda{ background:var(--giallo); border-radius:20px; padding:1.1rem 1.15rem 1.2rem; margin-bottom:.9rem; }
+.scheda .ic{ width:34px; height:34px; border-radius:10px; display:grid; place-items:center; background:var(--card); color:var(--rosso); margin-bottom:.55rem; }
+.scheda h2{ font-family:var(--titoli); font-weight:800; font-size:1.55rem; letter-spacing:-.025em; line-height:1.1; margin:0 0 .35rem; }
+.scheda p{ margin:0 0 .85rem; font-size:1.02rem; }
+.scheda .riga{ display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; margin-bottom:.85rem; }
+.primario{ display:inline-flex; align-items:center; gap:.5rem; border:0; background:var(--rosso); color:var(--sul-rosso); font-weight:700; font-size:1rem; padding:.75rem 1.15rem; border-radius:14px; text-decoration:none; }
+.primario:hover{ background:var(--rosso-scuro); }
+.primario[disabled]{ opacity:.4; cursor:not-allowed; }
+.secondario{ display:inline-flex; align-items:center; gap:.45rem; border:1.5px solid var(--bordo-forte); background:var(--card); font-weight:600; padding:.62rem .95rem; border-radius:13px; }
+.secondario[aria-pressed="true"]{ border-color:var(--rosso); color:var(--rosso); }
+.cursore{ display:grid; grid-template-columns:2rem 1fr 3.4rem; gap:.6rem; align-items:center; font-weight:600; margin-bottom:.4rem; }
+.cursore output{ text-align:right; font-variant-numeric:tabular-nums; }
+input[type=range]{ width:100%; accent-color:var(--rosso); }
+.tavola{ width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums; margin:0 0 .85rem; background:var(--card); border-radius:12px; overflow:hidden; }
+.tavola th,.tavola td{ text-align:center; padding:.42rem; border-bottom:1px solid var(--bordo); }
+.tavola th{ font-weight:600; color:var(--tenue); font-size:.9rem; }
+.tavola tr:last-child td{ border-bottom:0; }
+.tavola tr.ora td{ background:rgba(208,45,57,.1); font-weight:700; }
+.tavola td.uno{ color:var(--rosso); font-weight:700; }
+.obiettivi{ display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:.85rem; }
+.obiettivo{ display:inline-flex; align-items:center; gap:.4rem; background:var(--card); border-radius:999px; padding:.35rem .8rem .35rem .45rem; font-weight:600; font-size:.92rem; }
+.obiettivo i{ width:1.35rem; height:1.35rem; border-radius:50%; border:2px dashed var(--bordo-forte); display:grid; place-items:center; }
+.obiettivo.fatto i{ border:0; background:var(--rosso); color:var(--sul-rosso); }
+.obiettivo.fatto i svg{ width:.85rem; height:.85rem; stroke-width:3; }
+.esito{ background:var(--card); border-radius:12px; padding:.6rem .8rem; margin:0 0 .85rem; font-weight:500; }
+.scelta{ display:inline-flex; background:var(--card); border-radius:12px; padding:3px; gap:3px; }
+.scelta button{ border:0; background:transparent; padding:.45rem .85rem; border-radius:9px; font-weight:600; }
+.scelta button[aria-pressed="true"]{ background:var(--inchiostro); color:var(--pagina); }
+
+/* liste a richiesta */
+.blocco{ background:var(--card); border:1px solid var(--bordo); border-radius:20px; padding:1rem 1.1rem; margin-bottom:.9rem; }
+.blocco-testa{ display:flex; align-items:center; justify-content:space-between; gap:.5rem; margin-bottom:.3rem; }
+.blocco h3{ font-family:var(--titoli); font-weight:800; font-size:1.35rem; letter-spacing:-.02em; margin:0; }
+.voce{ border-bottom:1px solid var(--bordo); }
+.voce:last-child{ border-bottom:0; }
+.voce summary{ list-style:none; display:flex; align-items:center; gap:.7rem; padding:.7rem .1rem; cursor:pointer; font-weight:600; }
+.voce summary::-webkit-details-marker{ display:none; }
+.voce summary .pt{ width:.65rem; height:.65rem; border-radius:50%; background:var(--rosso); flex:none; }
+.voce summary svg{ margin-left:auto; color:var(--tenue); }
+.voce[open] summary svg{ color:var(--rosso); }
+.voce p{ margin:0 0 .75rem 1.35rem; color:var(--tenue); }
+.quaderno summary{ list-style:none; display:flex; align-items:center; gap:.85rem; cursor:pointer; }
+.quaderno summary::-webkit-details-marker{ display:none; }
+.quaderno summary .ic{ width:44px; height:44px; border-radius:12px; background:var(--giallo); display:grid; place-items:center; color:var(--rosso); }
+.quaderno summary b{ display:block; font-family:var(--titoli); font-size:1.15rem; }
+.quaderno summary small{ color:var(--tenue); font-size:.92rem; }
+.quaderno summary .gira{ margin-left:auto; transition:transform .2s; }
+.quaderno[open] summary .gira{ transform:rotate(180deg); }
+.quaderno ol{ list-style:none; margin:.8rem 0 0; padding:0; max-height:280px; overflow:auto; font-size:.94rem; }
+.quaderno li{ padding:.45rem 0; border-top:1px solid var(--bordo); }
+.quaderno .svuota{ border:0; background:none; color:var(--tenue); text-decoration:underline; font-size:.88rem; padding:.5rem 0 0; }
+
+/* indice */
+.lezione-card{ display:grid; grid-template-columns:auto 1fr; gap:.9rem; align-items:center; background:var(--card); border:2px solid var(--rosso); border-radius:22px; padding:1rem; margin-bottom:.7rem; }
+.lezione-card .ic{ width:64px; height:64px; border-radius:16px; background:var(--rosso); color:var(--sul-rosso); display:grid; place-items:center; font-family:var(--titoli); font-weight:800; font-size:1.8rem; }
+.lezione-card h2{ font-family:var(--titoli); font-size:1.35rem; letter-spacing:-.02em; margin:0; line-height:1.15; }
+.lezione-card p{ margin:.15rem 0 .5rem; color:var(--tenue); font-size:.95rem; }
+.segmenti{ display:flex; gap:5px; }
+.segmenti i{ height:6px; flex:1; max-width:60px; border-radius:3px; background:var(--bordo-forte); }
+.segmenti i.fatto{ background:var(--rosso); }
+.lezione-card .azione{ grid-column:1 / -1; display:flex; gap:.5rem; flex-wrap:wrap; }
+.prossima{ display:flex; align-items:center; gap:.9rem; border:1.5px dashed var(--bordo-forte); border-radius:18px; padding:.8rem 1rem; color:var(--tenue); margin-bottom:.9rem; }
+.prossima .ic{ width:44px; height:44px; border-radius:12px; border:1.5px dashed var(--bordo-forte); display:grid; place-items:center; font-family:var(--titoli); font-weight:800; font-size:1.2rem; }
+.numeri{ display:flex; flex-wrap:wrap; gap:.5rem; margin:0 0 .9rem; }
+.numeri span{ background:var(--giallo); border-radius:11px; padding:.4rem .75rem; font-size:.92rem; }
+.numeri b{ font-variant-numeric:tabular-nums; }
+.corso li{ display:flex; gap:.8rem; padding:.55rem 0; border-top:1px solid var(--bordo); color:var(--tenue); }
+.corso li b{ width:1.6rem; font-variant-numeric:tabular-nums; color:var(--inchiostro); }
+.corso ol{ list-style:none; margin:.6rem 0 0; padding:0; }
+
+/* confronta */
+.confronto{ background:var(--card); border:1px solid var(--bordo); border-radius:20px; overflow:hidden; margin-bottom:.9rem; }
+.confronto .testa{ display:grid; grid-template-columns:1fr 1fr; }
+.confronto .testa div{ padding:.9rem 1rem; display:flex; gap:.6rem; align-items:center; }
+.confronto .testa div + div{ border-left:1px solid var(--bordo); }
+.confronto .testa .ic{ width:38px; height:38px; border-radius:10px; background:var(--giallo); color:var(--rosso); display:grid; place-items:center; }
+.confronto .testa b{ display:block; line-height:1.2; }
+.confronto .testa small{ color:var(--tenue); }
+.confronto .riga-c{ border-top:1px solid var(--bordo); }
+.confronto .riga-c > span{ display:block; padding:.6rem 1rem 0; font-size:.85rem; font-weight:600; color:var(--tenue); }
+.confronto .riga-c > div{ display:grid; grid-template-columns:1fr 1fr; }
+.confronto .riga-c > div p{ margin:0; padding:.25rem 1rem .7rem; }
+.confronto .riga-c > div p + p{ border-left:1px solid var(--bordo); }
+.confronto .riga-c.chiave > div p:last-child{ color:var(--rosso); font-weight:700; }
+
+/* quiz */
+.avanzamento{ height:6px; background:var(--bordo); border-radius:3px; overflow:hidden; margin:0 0 .9rem; }
+.avanzamento i{ display:block; height:100%; background:var(--rosso); transition:width .3s; }
+.domanda h2{ font-family:var(--titoli); font-weight:700; font-size:1.3rem; letter-spacing:-.015em; line-height:1.25; margin:0 0 .9rem; }
+.risposte{ display:grid; gap:.5rem; margin-bottom:.9rem; }
+.risposte button{ text-align:left; border:1.5px solid var(--bordo-forte); background:var(--card); border-radius:14px; padding:.75rem .9rem; font-weight:500; display:flex; gap:.6rem; align-items:center; }
+.risposte button:hover:not([disabled]){ border-color:var(--rosso); }
+.risposte button.giusta{ border:2px solid var(--rosso); background:rgba(208,45,57,.08); font-weight:700; }
+.risposte button.sbagliata{ opacity:.55; text-decoration:line-through; }
+.risposte button[disabled]{ cursor:default; }
+
+/* finestre */
+dialog{ border:0; border-radius:24px; background:var(--card); color:var(--inchiostro); width:min(560px, calc(100vw - 1.5rem)); padding:1.4rem 1.3rem 1.2rem; box-shadow:0 20px 60px rgba(0,0,0,.35); }
+dialog::backdrop{ background:rgba(23,11,12,.55); }
+dialog h2{ font-family:var(--titoli); font-weight:800; font-size:1.6rem; letter-spacing:-.03em; margin:0 0 .9rem; }
+.passi-guida{ display:grid; gap:.8rem; margin:0 0 1.2rem; padding:0; list-style:none; }
+.passi-guida li{ display:flex; gap:.8rem; align-items:flex-start; }
+.passi-guida .ic{ width:38px; height:38px; border-radius:10px; background:var(--giallo); color:var(--rosso); display:grid; place-items:center; flex:none; }
+.passi-guida b{ display:block; }
+.passi-guida span{ color:var(--tenue); font-size:.95rem; }
+.storia p{ font-family:var(--lettura); font-size:1.05rem; line-height:1.7; margin:0 0 1rem; }
+.storia .fonte{ font-family:var(--ui); font-size:.88rem; color:var(--tenue); }
+.chiudi-riga{ display:flex; justify-content:space-between; align-items:center; margin-bottom:.4rem; }
+.chiudi-riga h2{ margin:0; }
+
+.piede{ padding:1rem 0 2rem; font-size:.85rem; color:var(--tenue); display:flex; flex-wrap:wrap; gap:.3rem 1rem; justify-content:space-between; }
+@media (prefers-reduced-motion: reduce){ *{ transition:none !important; } }
+@media (max-width:420px){ .strumenti button{ font-size:.78rem; } .schede button{ font-size:.85rem; gap:.25rem; } .schede button svg{ display:none; } }
+
+/* Dashboard a tre colonne, con geometria fissa */
+@media(min-width:1100px){
+ #vista-lezione.col{max-width:1600px;padding:0 22px}
+ #vista-lezione [data-pannello="prova"]{display:grid;grid-template-columns:220px minmax(0,1fr) 300px;gap:16px;align-items:start}
+ #vista-lezione .pannello-sinistro{grid-column:1;grid-row:1 / span 2;display:flex;flex-direction:column;gap:12px;min-width:0}
+ #vista-lezione .pannello-sinistro .modelli{display:flex;flex-direction:column;margin:0}
+ #vista-lezione .pannello-sinistro .attrezzi{margin:0;border:1px solid var(--bordo);border-radius:18px}
+ #vista-lezione .pannello-sinistro .strumenti{grid-auto-flow:row;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-columns:auto}
+ #vista-lezione .pannello-sinistro .strumenti button{min-width:0}
+ #vista-lezione [data-pannello="prova"]>.scena{grid-column:2;grid-row:1;min-width:0;border-radius:20px}
+ #vista-lezione [data-pannello="prova"]>.scheda{grid-column:3;grid-row:1;min-width:0}
+ #vista-lezione [data-pannello="prova"]>.blocco{grid-column:3;grid-row:2;min-width:0}
+ #vista-lezione .capo{padding:.5rem 0 .65rem}
+ #vista-lezione .capo h1{font-size:clamp(1.8rem,2.5vw,2.6rem)}
+ #vista-lezione .capo p{margin:.15rem 0 0;font-size:.9rem}
+}
+@media(min-width:700px) and (max-width:1099px){
+ #vista-lezione.col{max-width:100%;padding:0 16px}
+ #vista-lezione [data-pannello="prova"]{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:14px;align-items:start}
+ #vista-lezione .pannello-sinistro{grid-column:1 / -1;display:flex;gap:12px}
+ #vista-lezione .pannello-sinistro .modelli{flex:0 0 42%;margin:0}
+ #vista-lezione .pannello-sinistro .attrezzi{flex:1;margin:0}
+ #vista-lezione [data-pannello="prova"]>.scena{grid-column:1;min-width:0}
+ #vista-lezione [data-pannello="prova"]>.scheda{grid-column:2;min-width:0}
+ #vista-lezione [data-pannello="prova"]>.blocco{grid-column:2}
+}
+#vista-lezione .capo{padding-top:.55rem;padding-bottom:.65rem}
+#vista-lezione .capo h1{font-size:clamp(1.8rem,3vw,2.5rem)}
+#vista-lezione .capo p{margin-top:.2rem;font-size:.9rem}
+.barra{padding:.4rem 0}.schede{margin-bottom:.4rem}
+
+/* Introduzioni narrative integrate nel banco, con gli stessi materiali e luci */
+#scena{position:relative}
+.intro-lab{position:absolute;inset:0;z-index:8;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;border-radius:inherit;background:radial-gradient(ellipse at 47% 48%,#492327 0%,#271216 62%,#170b0f 100%);color:#F0EDBA}
+.intro-lab[hidden]{display:none!important}
+.intro-lab canvas{position:absolute;inset:0;width:100%!important;height:100%!important;aspect-ratio:auto!important;pointer-events:none}
+.intro-top,.intro-bottom{position:relative;z-index:1;padding:clamp(13px,2.5vw,26px)}
+.intro-top{display:flex;align-items:start;justify-content:space-between;gap:12px}
+.intro-kicker{font-size:.73rem;font-weight:750;letter-spacing:.13em;text-transform:uppercase;color:#E5B8A9}
+.intro-top h2{font-size:clamp(1.1rem,2.3vw,1.75rem);line-height:1.1;letter-spacing:-.035em;margin:.3rem 0 0;color:#F0EDBA}
+.intro-skip,.intro-replay{border:1px solid rgba(240,237,186,.42);border-radius:13px;background:rgba(20,9,12,.66);color:#F0EDBA;min-height:44px;padding:.5rem .8rem;font-weight:650;cursor:pointer}
+.intro-bottom{background:linear-gradient(transparent,rgba(17,6,9,.93) 32%);padding-top:35px}
+.intro-progress{display:flex;gap:6px;margin-bottom:12px}.intro-progress i{height:4px;flex:1;border-radius:8px;background:rgba(240,237,186,.25)}.intro-progress i.on{background:#D02D39}
+.intro-copy{font-size:clamp(.95rem,1.65vw,1.18rem);line-height:1.45;max-width:570px;min-height:2.9em;margin:0 0 12px;color:#F0EDBA}
+.intro-action{background:#D02D39;border:1px solid #F08589;color:#fff8e6;border-radius:14px;padding:12px 20px;min-height:48px;font-weight:750;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,.3)}
+.intro-action[hidden]{display:none!important}
+.intro-replay{position:absolute;z-index:4;right:12px;bottom:10px;font-size:.77rem;min-height:44px;opacity:.95}
+.intro-lab button:focus-visible,.intro-replay:focus-visible{outline:3px solid #F0EDBA;outline-offset:3px}
+@media(max-width:699px){.intro-top h2{font-size:1.12rem}.intro-copy{font-size:.92rem}.intro-top,.intro-bottom{padding:13px}.intro-bottom{padding-top:25px}.intro-replay{bottom:8px;right:8px}}
+@media(prefers-reduced-motion:reduce){.intro-lab *{animation:none!important;transition:none!important}}
+
+/* Apprendimento separato dalla prova: area narrativa dedicata */
+#vista-lezione [data-pannello="prova"]>.pannello-destro{min-width:0;display:flex;flex-direction:column;gap:12px;grid-column:3;grid-row:1;align-self:start}
+#vista-lezione [data-pannello="prova"]>.pannello-destro>.scheda{margin:0}
+#vista-lezione [data-pannello="prova"]>.pannello-destro>.blocco{margin:0}
+@media(min-width:700px) and (max-width:1099px){#vista-lezione [data-pannello="prova"]>.pannello-destro{grid-column:2;grid-row:2}}
+@media(max-width:699px){#vista-lezione [data-pannello="prova"]>.pannello-destro{display:flex;flex-direction:column;gap:12px}}
+#vista-lezione [data-pannello="impara"]{max-width:1500px;margin:auto}
+.impara-intestazione{margin:0 0 18px}.impara-eyebrow{color:var(--rosso);font-size:.76rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.impara-intestazione h2{font-family:var(--titoli);font-size:clamp(1.65rem,3vw,2.8rem);margin:.25rem 0}.impara-intestazione p{max-width:690px;line-height:1.55;margin:0;color:var(--tenue)}
+.impara-layout{display:grid;grid-template-columns:230px minmax(0,1fr);gap:16px;align-items:start}
+.impara-scelta{display:flex;flex-direction:column;gap:10px}.impara-scelta button{border:1px solid var(--bordo-forte);background:var(--card);border-radius:16px;text-align:left;padding:16px;min-height:76px;color:var(--inchiostro)}.impara-scelta button[aria-pressed="true"]{background:var(--giallo);border-color:var(--rosso)}.impara-scelta button b,.impara-scelta button span{display:block}.impara-scelta button span{font-size:.83rem;margin-top:5px;color:var(--tenue)}.impara-nota{font-size:.86rem;line-height:1.55;padding:14px;color:var(--tenue)}
+.impara-palco{min-width:0;border-radius:23px;overflow:hidden;background:#1c0d11;box-shadow:0 14px 35px rgba(25,9,11,.18)}
+.impara-palco .intro-lab{position:relative;inset:auto;min-height:clamp(420px,59vh,670px);border-radius:0}
+.impara-palco .intro-lab canvas{position:absolute}
+.impara-palco .intro-bottom{padding-bottom:28px}
+.impara-palco .intro-copy{min-height:3.5em;max-width:660px;font-size:clamp(1.04rem,1.7vw,1.32rem)}
+.impara-palco .intro-progress i{position:relative;overflow:hidden;background:rgba(240,237,186,.22)}
+.impara-palco .intro-progress i::before{content:"";position:absolute;inset:0 auto 0 0;width:var(--fill,0%);background:#D02D39;transition:none}
+.impara-controlli{display:flex;align-items:center;gap:9px;padding:12px 18px;background:#241216;color:#F0EDBA;flex-wrap:wrap}
+.impara-controlli button{background:transparent;color:#F0EDBA;border:1px solid rgba(240,237,186,.45);border-radius:11px;padding:10px 14px;min-height:44px}.impara-controlli button:disabled{opacity:.35;cursor:default}.impara-controlli span{margin-left:auto;font-size:.85rem}
+@media(max-width:760px){.impara-layout{grid-template-columns:1fr}.impara-scelta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.impara-nota{grid-column:1/-1;padding:4px}.impara-scelta button{padding:12px;min-height:70px}.impara-palco .intro-lab{min-height:480px}.impara-palco .intro-top{padding:16px}.impara-palco .intro-bottom{padding:18px}.impara-palco .intro-copy{font-size:1.05rem}}
+@media(max-width:699px){.schede button{font-size:.78rem;padding:.6rem .08rem;gap:0}.schede button svg{display:none}}
+@media(max-width:420px){.impara-palco .intro-lab{min-height:435px}.impara-palco .intro-top h2{font-size:1.15rem}.impara-palco .intro-copy{font-size:.98rem}.impara-intestazione p{font-size:.92rem}}
+@media(prefers-reduced-motion:reduce){.impara-palco .intro-progress i::before{transition:none}}
+
+/* Narration: dedicated image stage and reading area, never overlapping */
+.impara-palco .intro-lab{min-height:660px;display:grid;grid-template-rows:90px minmax(250px,1fr) auto;}
+.impara-palco .intro-top{grid-row:1;padding:20px 24px 10px;}
+.impara-palco .intro-lab canvas{position:relative!important;inset:auto!important;grid-row:2;width:100%!important;height:100%!important;min-height:250px;align-self:stretch;}
+.impara-palco .intro-bottom{grid-row:3;position:relative;padding:20px 24px 24px;background:#190b0f;border-top:1px solid rgba(240,237,186,.17);}
+.impara-palco .intro-copy{min-height:3.2em;margin:0 0 12px;max-width:780px;}
+.impara-palco .intro-progress{margin-bottom:16px;}
+@media(max-width:760px){.impara-palco .intro-lab{min-height:625px;grid-template-rows:85px minmax(210px,1fr) auto}.impara-palco .intro-bottom{padding:18px}.impara-palco .intro-top{padding:16px}}
+@media(max-width:420px){.impara-palco .intro-lab{min-height:590px;grid-template-rows:85px minmax(195px,1fr) auto}.impara-palco .intro-copy{font-size:1rem;min-height:4.5em}}
+/* The same large scene treatment in Prova and Missione */
+@media(min-width:1100px){#vista-lezione [data-pannello="prova"]>.scena canvas{height:clamp(450px,60vh,670px);aspect-ratio:auto}#vista-lezione [data-pannello="missione"]{display:grid;grid-template-columns:220px minmax(0,1fr) 300px;gap:16px;align-items:start}#vista-lezione [data-pannello="missione"]>.missione-intro{grid-column:1/-1;grid-row:1}#vista-lezione [data-pannello="missione"]>.attrezzi{grid-column:1;grid-row:2;border:1px solid var(--bordo);border-radius:19px;margin:0}#vista-lezione [data-pannello="missione"]>.scena{grid-column:2;grid-row:2;border-radius:23px}#vista-lezione [data-pannello="missione"]>.scheda{grid-column:3;grid-row:2;margin:0}#vista-lezione [data-pannello="missione"]>.scena canvas{height:clamp(450px,60vh,670px);aspect-ratio:auto}#vista-lezione [data-pannello="missione"] .strumenti{display:flex;flex-direction:column;gap:7px}#vista-lezione [data-pannello="missione"] .strumenti button{width:100%;min-height:50px;flex-direction:row;justify-content:flex-start;gap:10px}}
+@media(min-width:700px) and (max-width:1099px){#vista-lezione [data-pannello="missione"]{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:14px}#vista-lezione [data-pannello="missione"]>.missione-intro{grid-column:1/-1}#vista-lezione [data-pannello="missione"]>.scena{grid-column:1}#vista-lezione [data-pannello="missione"]>.scheda{grid-column:2}#vista-lezione [data-pannello="missione"]>.attrezzi{grid-column:1;grid-row:3}}
+.missione-intro{padding:0 0 4px}.missione-intro h2,.pratica-intro h2{font-family:var(--titoli);font-size:clamp(1.5rem,2.5vw,2.4rem);margin:.3rem 0}.missione-intro p,.pratica-intro p{max-width:800px;line-height:1.55;color:var(--tenue);font-size:.96rem}
+.pratica-layout{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:20px}.pratica-card{background:var(--card);border:1px solid var(--bordo);border-radius:22px;overflow:hidden;box-shadow:var(--elev)}.pratica-visual{background:radial-gradient(ellipse at 50% 50%,#492327,#1c0c11);height:280px}.pratica-visual canvas{width:100%;height:100%;display:block}.pratica-copy{padding:24px}.pratica-copy h3{font-family:var(--titoli);font-size:1.6rem;margin:10px 0}.pratica-copy p{line-height:1.6;margin:0 0 12px}.pratica-copy button{margin-top:10px}
+@media(max-width:800px){.pratica-layout{grid-template-columns:1fr}.pratica-visual{height:230px}.pratica-copy{padding:18px}}
+@media(max-width:420px){.schede{gap:0}.schede button{font-size:.7rem;padding:.5rem .04rem}}
+
+/* Rifiniture v3: navigazione in una sola riga e palcoscenico contenuto */
+#schede.schede{display:flex;flex-wrap:nowrap;align-items:stretch;gap:4px;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;}
+#schede.schede[hidden]{display:none}
+#schede.schede button{flex:1 0 auto;white-space:nowrap;min-width:0;scroll-snap-align:start;padding:.65rem clamp(7px,1.3vw,17px);font-size:clamp(.78rem,1.15vw,.96rem)}
+#schede.schede button svg{flex:none}
+@media(max-width:760px){#schede.schede button{font-size:.82rem;padding:.6rem 11px}}
+.confronto .testa>div:last-child>span:last-child{min-width:0;display:block}
+.confronto-argomenti{display:block;font-size:.78rem;line-height:1.5;color:var(--tenue);margin-top:5px;font-weight:500}
+.impara-layout{grid-template-columns:230px minmax(0,1fr) minmax(0,300px);}
+.impara-palco{grid-column:2;max-width:100%;}
+.impara-palco .intro-lab{height:clamp(430px,62vh,650px);min-height:0;grid-template-rows:76px minmax(0,1fr) auto;}
+.impara-palco .intro-lab canvas{min-height:0;height:100%!important;object-fit:contain}
+.impara-palco .intro-top{padding:15px 20px 5px}
+.impara-palco .intro-bottom{padding:14px 20px 16px}
+.impara-palco .intro-copy{font-size:clamp(.92rem,1.25vw,1.08rem);min-height:2.8em;line-height:1.45}
+.impara-palco .intro-progress{margin-bottom:10px}
+@media(max-width:1350px){.impara-layout{grid-template-columns:200px minmax(0,1fr)}.impara-palco{grid-column:2}}
+@media(max-width:760px){.impara-layout{grid-template-columns:minmax(0,1fr)}.impara-palco{grid-column:1}.impara-palco .intro-lab{height:clamp(425px,70vh,580px);grid-template-rows:70px minmax(0,1fr) auto}}
+@media(max-width:420px){.impara-palco .intro-lab{height:480px;min-height:0;grid-template-rows:65px minmax(0,1fr) auto}.impara-palco .intro-bottom{padding:12px}.impara-palco .intro-copy{font-size:.9rem;min-height:3.2em}}
+
+/* Feedback conclusivo sul limite di addestramento */
+#scena .limite-percettrone[hidden]{display:none!important}
+#scena .limite-percettrone{position:absolute;z-index:8;left:clamp(12px,5%,42px);right:clamp(12px,5%,42px);top:50%;transform:translateY(-50%);padding:clamp(18px,3vw,35px);background:rgba(25,10,13,.94);border:2px solid #F0EDBA;border-left:7px solid #D02D39;border-radius:22px;box-shadow:0 20px 65px rgba(0,0,0,.58),0 0 45px rgba(208,45,57,.2);color:#F0EDBA;font-family:var(--titoli);font-weight:800;font-size:clamp(1.35rem,3.1vw,2.7rem);line-height:1.14;letter-spacing:-.035em;text-align:center;pointer-events:none}
+
+/* La composizione progressiva del testo non modifica mai l'area del disegno. */
+.impara-palco .intro-lab{grid-template-rows:76px minmax(0,1fr) 188px!important;overflow:hidden}
+.impara-palco .intro-bottom{height:188px;min-height:188px;box-sizing:border-box;overflow:hidden}
+.impara-palco .intro-copy{height:4.6em;min-height:4.6em;max-height:4.6em;overflow:hidden}
+.impara-palco .intro-lab canvas{display:block;min-width:0;min-height:0;align-self:stretch}
+@media(max-width:760px){.impara-palco .intro-lab{grid-template-rows:70px minmax(0,1fr) 200px!important}.impara-palco .intro-bottom{height:200px;min-height:200px}.impara-palco .intro-copy{height:5.4em;min-height:5.4em;max-height:5.4em}}
+@media(max-width:420px){.impara-palco .intro-lab{grid-template-rows:65px minmax(0,1fr) 205px!important}.impara-palco .intro-bottom{height:205px;min-height:205px}}
+
+/* Correzione griglia Impara: i tre elementi occupano la STESSA colonna.
+   Evita la colonna implicita che tagliava la scena e lasciava un vuoto a destra. */
+.impara-palco .intro-lab{display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:76px minmax(0,1fr) 188px!important;width:100%;}
+.impara-palco .intro-top{grid-column:1!important;grid-row:1!important;min-width:0;}
+.impara-palco .intro-lab canvas{grid-column:1!important;grid-row:2!important;width:100%!important;max-width:100%;min-width:0;justify-self:stretch;}
+.impara-palco .intro-bottom{grid-column:1!important;grid-row:3!important;min-width:0;width:100%;}
+@media(max-width:760px){.impara-palco .intro-lab{grid-template-rows:70px minmax(0,1fr) 200px!important}}
+@media(max-width:420px){.impara-palco .intro-lab{grid-template-rows:65px minmax(0,1fr) 205px!important}}
+
+
+/* Confronto: etichette ripetute nelle due colonne, allineate per riga */
+.confronto .riga-c{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.confronto .riga-c>.cella-c{min-width:0;padding:.65rem 1rem .8rem}
+.confronto .riga-c>.cella-c+.cella-c{border-left:1px solid var(--bordo)}
+.confronto .riga-c>.cella-c>span{display:block;font-size:.85rem;font-weight:650;color:var(--tenue);margin-bottom:.35rem}
+.confronto .riga-c>.cella-c>p{margin:0;padding:0;line-height:1.4}
+.confronto .riga-c.chiave>.cella-c:last-child p{color:var(--rosso);font-weight:700}
+
+/* v8: pannello narrativo compatto, senza spazio vuoto tra frase e comandi. */
+.impara-palco .intro-lab{height:500px!important;min-height:0!important;grid-template-rows:76px minmax(0,1fr) 136px!important;}
+.impara-palco .intro-bottom{height:136px!important;min-height:136px!important;padding:12px 20px!important;}
+.impara-palco .intro-progress{margin-bottom:9px!important;}
+.impara-palco .intro-copy{height:auto!important;min-height:2.8em!important;max-height:3.1em!important;margin-bottom:7px!important;line-height:1.4!important;}
+.impara-palco .intro-action{min-height:40px;padding:7px 13px;}
+@media(max-width:760px){.impara-palco .intro-lab{height:455px!important;grid-template-rows:70px minmax(0,1fr) 145px!important}.impara-palco .intro-bottom{height:145px!important;min-height:145px!important}}
+@media(max-width:420px){.impara-palco .intro-lab{height:420px!important;grid-template-rows:65px minmax(0,1fr) 150px!important}.impara-palco .intro-bottom{height:150px!important;min-height:150px!important;padding:10px 12px!important}}
+</style>
+</head>
+<body>
+<header class="testata">
+<div class="col">
+<div class="barra">
+<a aria-label="Torna all’indice" class="marchio" href="#indice"><span class="logo">Σ</span><b>Prendiamoci la <span>matematica</span></b></a>
+
+</div>
+<nav aria-label="Sezioni della lezione" class="schede" hidden="" id="schede" role="tablist">
+<button aria-selected="true" data-scheda="impara" role="tab"><svg class="i" data-i="libro"></svg>Impara</button>
+<button aria-selected="false" data-scheda="prova" role="tab"><svg class="i" data-i="neurone"></svg>Prova</button>
+<button aria-selected="false" data-scheda="confronta" role="tab"><svg class="i" data-i="confronta"></svg>Confronta</button>
+<button aria-selected="false" data-scheda="missione" role="tab"><svg class="i" data-i="bandiera"></svg>Scommetti</button>
+<button aria-selected="false" data-scheda="pratica" role="tab"><svg class="i" data-i="neurone"></svg>In pratica</button>
+<button aria-selected="false" data-scheda="quiz" role="tab"><svg class="i" data-i="quiz"></svg>Quiz</button>
+</nav>
+</div>
+</header>
+<!-- ============ INDICE ============ -->
+<main class="col" id="vista-indice">
+<div class="capo">
+<h1>Prendiamoci la matematica</h1>
+<p>La matematica delle AI generative, da provare con le mani. Una lezione alla volta.</p>
+</div>
+<div class="numeri" id="numeri"></div>
+<article class="lezione-card">
+<div class="ic">1</div>
+<div>
+<h2>Il neurone che decide</h2>
+<p>Dal 1943 al primo inverno delle AI</p>
+<div class="segmenti" id="segmenti"></div>
+</div>
+<div class="azione"><a class="primario" href="#lezione-1" id="vai-lezione"><svg class="i" data-i="play"></svg>Inizia</a></div>
+</article>
+<div class="prossima"><div class="ic">2</div><div><b>Lezione 2</b><br/><small>In preparazione</small></div></div>
+<details class="blocco corso">
+<summary class="blocco-testa" style="cursor:pointer;list-style:none"><h3>Tutto il corso</h3><svg class="i" data-i="giu"></svg></summary>
+<ol id="corso"></ol>
+</details>
+</main>
+<!-- ============ LEZIONE 1 ============ -->
+<main class="col" hidden="" id="vista-lezione">
+<div class="capo">
+<h1>Il neurone che decide</h1>
+<p>Lezione 1. Dal 1943 al primo inverno delle AI</p>
+</div>
+<!-- PROVA -->
+<section data-pannello="prova">
+<div class="pannello-sinistro"><div aria-label="Modello" class="modelli" role="group">
+<button aria-pressed="true" class="modello" data-modello="neurone"><span class="ic"><svg class="i" data-i="neurone"></svg></span><span><b>Neurone</b><small>1943</small></span></button>
+<button aria-pressed="false" class="modello" data-modello="percettrone"><span class="ic"><svg class="i" data-i="piano"></svg></span><span><b>Percettrone</b><small>1958</small></span></button>
+</div><div class="attrezzi">
+<div class="formule" hidden="" id="sc-formule"></div>
+<div aria-label="Strumenti" class="strumenti" id="strumenti" role="group"></div>
+<div class="extra">
+<button aria-pressed="false" class="chip" data-extra="formule" type="button"><svg class="i" data-i="sigma"></svg>Formule</button>
+<button aria-pressed="true" class="chip" data-extra="etichette" type="button"><svg class="i" data-i="etichetta"></svg>Etichette</button>
+<button class="chip" data-storia="" type="button"><svg class="i" data-i="libro"></svg>Storia</button>
+</div>
+</div></div>
+<div class="scena" id="scena">
+<canvas aria-label="Neurone con due ingressi, una somma, una soglia e un’uscita" id="tela-n"></canvas>
+<canvas aria-label="Piano con punti di due colori e la retta del percettrone" hidden="" id="tela-p"></canvas>
+<div class="nome"><b id="sc-nome"></b><i id="sc-sotto"></i></div>
+<div class="pillola" id="sc-pillola"><i></i><span></span></div>
+<div class="limite-percettrone" id="limite-percettrone" role="status" aria-live="assertive" hidden>Hai scoperto dove il perceptron smette di funzionare.</div>
+<div class="comandi" id="sc-comandi"></div>
+<div class="lettura" id="sc-lettura"></div>
+<div class="suggerimento"><svg class="i" data-i="tocco"></svg><span id="sc-sugg"></span></div>
+
+</div>
+
+<div class="pannello-destro">
+<div aria-live="polite" class="scheda" id="scheda"></div>
+<section class="blocco">
+<div class="blocco-testa"><h3>Concetti</h3></div>
+<div id="concetti"></div>
+</section>
+</div>
+</section>
+<!-- IMPARA -->
+<section data-pannello="impara" hidden="">
+<div class="impara-intestazione"><div><span class="impara-eyebrow">Prima osserva, poi sperimenta</span><h2>Impara</h2><p>Guarda i segnali attraversare la macchina, segui ogni passaggio e scopri che cosa cambia quando una regola può imparare.</p></div></div>
+<div class="impara-layout">
+<aside class="impara-scelta" aria-label="Scegli il modello da conoscere">
+<button type="button" data-impara-modello="neurone" aria-pressed="true"><b>01 · Neurone</b><span>McCulloch e Pitts, 1943</span></button>
+<button type="button" data-impara-modello="percettrone" aria-pressed="false"><b>02 · Percettrone</b><span>Rosenblatt, 1958</span></button>
+
+</aside>
+<div class="impara-palco">
+<div class="intro-lab" id="intro-lab" hidden aria-label="Introduzione animata alla simulazione">
+<canvas id="intro-canvas" aria-hidden="true"></canvas>
+<div class="intro-top"><div><div class="intro-kicker" id="intro-kicker"></div><h2 id="intro-title"></h2></div><button class="intro-skip" id="intro-skip" type="button">Salta</button></div>
+<div class="intro-bottom"><div class="intro-progress" id="intro-progress" aria-hidden="true"><i></i><i></i><i></i><i></i></div><p class="intro-copy" id="intro-copy" aria-live="polite"></p><button class="intro-action" id="intro-start" type="button" hidden>Inizia la simulazione</button></div>
+</div>
+<div class="impara-controlli"><button type="button" id="intro-restart">Ricomincia</button><button type="button" id="intro-prev">Indietro</button><button type="button" id="intro-pause" aria-pressed="false">Pausa</button><button type="button" id="intro-next">Avanti</button><span id="intro-tempo" aria-live="off"></span></div>
+</div>
+</div>
+</section>
+<!-- PRATICA -->
+<section data-pannello="pratica" hidden="">
+<div class="pratica-intro"><span class="impara-eyebrow">Dalla regola al mondo</span><h2>In pratica</h2><p>Due situazioni concrete per capire che cosa fa una macchina che decide e che cosa cambia quando può imparare dagli esempi.</p></div>
+<div class="pratica-layout">
+<article class="pratica-card"><div class="pratica-visual"><canvas id="pratica-neurone" aria-label="Due segnali di allarme attraversano un neurone a soglia"></canvas></div><div class="pratica-copy"><span class="impara-eyebrow">Esempio 01 · Regola fissata</span><h3>Un allarme con due sensori</h3><p>Immagina due sensori: uno rileva fumo, l’altro un aumento di temperatura. Se la regola richiede entrambi i segnali, la soglia è 2. Un solo segnale non basta; con due segnali l’allarme si accende.</p><p>È un esempio di decisione logica costruita con il neurone semplificato, non di apprendimento.</p><button type="button" class="secondario" data-pratica="neurone">Prova questo neurone</button></div></article>
+<article class="pratica-card"><div class="pratica-visual"><canvas id="pratica-percettrone" aria-label="Due caratteristiche con pesi diversi entrano in un percettrone"></canvas></div><div class="pratica-copy"><span class="impara-eyebrow">Esempio 02 · Regola appresa</span><h3>Riconoscere un messaggio indesiderato</h3><p>Un classificatore semplice può considerare due caratteristiche di un messaggio, per esempio la presenza di una parola e il numero di link. I pesi indicano quanto ciascuna caratteristica conta nella decisione.</p><p>Mostrando esempi etichettati, il percettrone corregge i pesi quando sbaglia. È un modello didattico: i filtri antispam reali usano spesso metodi più complessi.</p><button type="button" class="secondario" data-pratica="percettrone">Prova questo percettrone</button></div></article>
+</div></section>
+<!-- MISSIONE -->
+<section data-pannello="missione" hidden="">
+<div class="missione-intro"><span class="impara-eyebrow">Una scommessa sulle porte logiche</span><h2>AND, OR, XOR: riuscirà a impararle?</h2><p>AND vale 1 solo quando entrambi gli ingressi valgono 1. OR vale 1 quando almeno uno vale 1. XOR vale 1 quando ne vale 1 esattamente uno. Provale tutte e tre: prima scommetti, poi guarda se una sola retta basta.</p></div>
+<div class="scena">
+<canvas aria-label="Quattro punti agli angoli di un quadrato e la retta del percettrone" id="tela-m"></canvas>
+<div class="nome"><b id="m-nome">Porta XOR</b><i>Minsky e Papert, 1969</i></div>
+<div class="pillola" id="m-pillola"><i></i><span></span></div>
+<div class="lettura" id="m-lettura"></div>
+<div class="suggerimento"><svg class="i" data-i="bandiera"></svg><span id="m-sugg">Prima la scommessa, poi l’esperimento</span></div>
+</div>
+<div class="attrezzi">
+<div aria-label="Porta da insegnare" class="strumenti" role="group">
+<button aria-pressed="false" data-porta="AND"><svg class="i" data-i="angoli"></svg>AND</button>
+<button aria-pressed="false" data-porta="OR"><svg class="i" data-i="angoli"></svg>OR</button>
+<button aria-pressed="true" data-porta="XOR"><svg class="i" data-i="angoli"></svg>XOR</button>
+</div>
+<div class="extra"><button class="chip" data-storia="" type="button"><svg class="i" data-i="libro"></svg>Storia</button></div>
+</div>
+<div class="scheda" id="scheda-m"></div>
+</section>
+<!-- CONFRONTA -->
+<section data-pannello="confronta" hidden="">
+<div class="confronto">
+<div class="testa">
+<div><span class="ic"><svg class="i" data-i="neurone"></svg></span><span><b>Neurone</b><small>1943</small></span></div>
+<div><span class="ic"><svg class="i" data-i="piano"></svg></span><span><b>Percettrone</b><small>1958</small></span></div>
+</div>
+<div class="riga-c"><div class="cella-c"><span>Ingressi</span><p>0 oppure 1</p></div><div class="cella-c"><span>Ingressi</span><p>Numeri qualsiasi</p></div></div>
+<div class="riga-c"><div class="cella-c"><span>Pesi</span><p>Ogni ingresso conta 1</p></div><div class="cella-c"><span>Pesi</span><p>Uno per ingresso</p></div></div>
+<div class="riga-c"><div class="cella-c"><span>Soglia</span><p>Fissata a mano</p></div><div class="cella-c"><span>Soglia</span><p>Diventa il bias b</p></div></div>
+<div class="riga-c chiave"><div class="cella-c"><span>Impara dagli esempi</span><p>No</p></div><div class="cella-c"><span>Impara dagli esempi</span><p>Sì</p></div></div>
+<div class="riga-c"><div class="cella-c"><span>Dove si ferma</span><p>Ogni compito va cablato</p></div><div class="cella-c"><span>Dove si ferma</span><p>Davanti a XOR</p></div></div>
+</div>
+<details class="blocco voce" style="padding:.3rem 1.1rem">
+<summary><span class="pt"></span>Che cosa cambia davvero<svg class="i" data-i="info"></svg></summary>
+<p>La somma e la soglia restano le stesse. Cambia chi sceglie i numeri: nel 1943 una persona, dal 1958 gli esempi. Su questo spostamento si reggono ancora oggi tutte le reti neurali.</p>
+</details>
+<button class="primario" data-vai="missione" type="button"><svg class="i" data-i="bandiera"></svg>Metti alla prova il percettrone</button>
+</section>
+<!-- QUIZ -->
+<section data-pannello="quiz" hidden="">
+<div class="avanzamento"><i id="q-barra" style="width:0"></i></div>
+<div class="scheda domanda" id="q-scheda"></div>
+</section>
+<section class="blocco quaderno-blocco" style="margin-top:.9rem">
+<details class="quaderno">
+<summary><span class="ic"><svg class="i" data-i="quaderno"></svg></span><span><b>Prendiamo appunti</b><small id="q-conta">Le mosse fatte nella lezione</small></span><svg class="i gira" data-i="giu"></svg></summary>
+<ol id="quaderno"></ol>
+<button class="svuota" id="svuota" type="button">Cancella gli appunti</button>
+</details>
+</section>
+</main>
+<footer class="col piede">
+<span>Una serie di Alberto Puliafito per Slow News</span>
+<span>Modelli semplificati per l’osservazione</span>
+</footer>
+<dialog aria-labelledby="guida-t" id="guida">
+<h2 id="guida-t">Come funziona</h2>
+<ul class="passi-guida">
+<li><span class="ic"><svg class="i" data-i="neurone"></svg></span><span><b>Scegli un modello</b><span>Il neurone del 1943 o il percettrone del 1958.</span></span></li>
+<li><span class="ic"><svg class="i" data-i="tocco"></svg></span><span><b>Toccalo</b><span>Gli strumenti sotto lo schermo cambiano quello che fa il tocco.</span></span></li>
+<li><span class="ic"><svg class="i" data-i="play"></svg></span><span><b>Segui il pulsante rosso</b><span>Porta al passo successivo, un gesto alla volta.</span></span></li>
+<li><span class="ic"><svg class="i" data-i="info"></svg></span><span><b>Le parole quando servono</b><span>Formule, storia e definizioni compaiono solo se le apri.</span></span></li>
+</ul>
+<form method="dialog"><button class="primario">Comincia</button></form>
+</dialog>
+<dialog aria-labelledby="storia-t" id="storia">
+<div class="chiudi-riga"><h2 id="storia-t"></h2><form method="dialog"><button aria-label="Chiudi" class="tondo" id="chiudi-storia" type="submit" value="chiudi"><svg class="i" data-i="x"></svg></button></form></div>
+<div class="storia" id="storia-testo"></div>
+</dialog>
+<script>
+(function(){
+"use strict";
+const $ = s => document.querySelector(s), $$ = s => Array.from(document.querySelectorAll(s));
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const num = (v,d=2) => v.toFixed(d).replace(".", ",").replace("-", "\u2212");
+
+/* ---------- icone ---------- */
+const IC = {
+  aiuto:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6"/><path d="M12 17.3h.01"/>',
+  neurone:'<circle cx="13" cy="12" r="3.5"/><path d="M3 6.5l6.6 4M3 17.5l6.6-4M16.5 12H21"/>',
+  piano:'<rect x="3.5" y="3.5" width="17" height="17" rx="2.5"/><path d="M5 18L19 7"/><circle cx="8.5" cy="8.5" r="1.2"/><circle cx="15.5" cy="15.5" r="1.2"/>',
+  confronta:'<rect x="3.5" y="4" width="7" height="16" rx="1.5"/><rect x="13.5" y="4" width="7" height="16" rx="1.5"/>',
+  bandiera:'<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
+  quiz:'<rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="M8 12l2.5 2.5L16 9"/>',
+  tocco:'<path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11m0-1a1.5 1.5 0 0 1 3 0v1.5m0-.5a1.5 1.5 0 0 1 3 0v3.5a6.5 6.5 0 0 1-6.5 6.5H11a5 5 0 0 1-4.2-2.3L4.5 15a1.5 1.5 0 0 1 2.4-1.8L9 15"/>',
+  soglia:'<path d="M3 17h18"/><path d="M3 9h18" stroke-dasharray="2 3"/><circle cx="14" cy="9" r="2.5"/>',
+  tavola:'<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 10h16M4 15h16M12 4v16"/>',
+  occhio:'<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>',
+  passo:'<path d="M6 5l9 7-9 7z"/><path d="M18.5 5v14"/>',
+  play:'<path d="M7 4.5l12 7.5-12 7.5z"/>',
+  pausa:'<path d="M8 5v14M16 5v14"/>',
+  pesi:'<path d="M4 7h9M17 7h3M4 17h4M12 17h8"/><circle cx="15" cy="7" r="2"/><circle cx="10" cy="17" r="2"/>',
+  aggiungi:'<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>',
+  reset:'<path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4.5h4.5"/>',
+  sigma:'<path d="M17 5H7l5.5 7L7 19h10"/>',
+  libro:'<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5zM20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5z"/>',
+  etichetta:'<path d="M3.5 12.5v-8a1 1 0 0 1 1-1h8l8 8-9 9z"/><circle cx="8" cy="8" r="1.4"/>',
+  info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.5h.01"/>',
+  giu:'<path d="M6 9l6 6 6-6"/>',
+  punti:'<circle cx="7" cy="8" r="1.8"/><circle cx="16" cy="6.5" r="1.8"/><circle cx="10" cy="16" r="1.8"/><circle cx="17.5" cy="15" r="1.8"/>',
+  spunta:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  angoli:'<circle cx="7" cy="7" r="2"/><circle cx="17" cy="7" r="2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>',
+  strati:'<circle cx="5" cy="8" r="1.8"/><circle cx="5" cy="16" r="1.8"/><circle cx="12" cy="8" r="1.8"/><circle cx="12" cy="16" r="1.8"/><circle cx="19" cy="12" r="1.8"/><path d="M6.8 8h3.4M6.8 16h3.4M6.6 9l3.8 6M6.6 15l3.8-6M13.8 8.8l3.4 2.4M13.8 15.2l3.4-2.4"/>',
+  quaderno:'<rect x="5" y="3.5" width="14" height="17" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/>',
+  x:'<path d="M6 6l12 12M18 6L6 18"/>'
+};
+const icona = n => '<svg class="i" viewBox="0 0 24 24">' + IC[n] + '</svg>';
+function disegnaIcone(radice){ (radice||document).querySelectorAll("svg[data-i]").forEach(s => { s.setAttribute("viewBox","0 0 24 24"); s.innerHTML = IC[s.dataset.i] || ""; s.removeAttribute("data-i"); }); }
+disegnaIcone();
+
+/* ---------- stato salvato ---------- */
+const CHIAVE = "pm-console-v2";
+function carica(){ try{ const v = localStorage.getItem(CHIAVE); return v ? JSON.parse(v) : null; }catch(e){ return null; } }
+function salva(){ try{ localStorage.setItem(CHIAVE, JSON.stringify(S)); }catch(e){} }
+const S = Object.assign({ and:false, or:false, perc:false, xor:false, quiz:null, guida:false, mosse:0, quaderno:[] }, carica() || {});
+if(!Array.isArray(S.quaderno)) S.quaderno = [];
+function annota(t){ S.quaderno.unshift(t); if(S.quaderno.length > 80) S.quaderno.length = 80; S.mosse++; salva(); disegnaQuaderno(); }
+function disegnaQuaderno(){
+  const ol = $("#quaderno"); ol.innerHTML = "";
+  S.quaderno.forEach(t => { const li = document.createElement("li"); li.textContent = t; ol.appendChild(li); });
+  $("#q-conta").textContent = S.quaderno.length ? S.quaderno.length + " annotazioni" : "Le mosse fatte nella lezione";
+}
+$("#svuota").addEventListener("click", () => { S.quaderno = []; salva(); disegnaQuaderno(); });
+
+/* ---------- tele ---------- */
+function tela(el, disegna){
+  const ctx = el.getContext("2d"), t = { ctx, W:0, H:0 }; let attesa = false;
+  function misura(){ const r = el.getBoundingClientRect(), d = window.devicePixelRatio || 1; t.W = r.width; t.H = r.height; if(t.W < 2) return; el.width = Math.round(t.W*d); el.height = Math.round(t.H*d); ctx.setTransform(d,0,0,d,0,0); disegna(t); }
+  new ResizeObserver(() => { if(attesa) return; attesa = true; requestAnimationFrame(() => { attesa = false; misura(); }); }).observe(el);
+  t.ridisegna = () => { if(t.W >= 2) disegna(t); };
+  return t;
+}
+function geoPiano(t, dom, alto, basso){
+  const pad = 22, s = Math.min(t.W - 2*pad, t.H - alto - basso), ox = (t.W - s)/2, oy = alto + (t.H - alto - basso - s)/2, k = s/(dom[1]-dom[0]);
+  return { s, ox, oy, X: x => ox + (x-dom[0])*k, Y: y => oy + s - (y-dom[0])*k, inv: (px,py) => [(px-ox)/k + dom[0], (oy+s-py)/k + dom[0]] };
+}
+function segmento(w, dom){
+  const [a,z] = dom, P = [];
+  if(Math.abs(w.w2) > 1e-9) [a,z].forEach(x => { const y = -(w.w1*x + w.b)/w.w2; if(y >= a-1e-9 && y <= z+1e-9) P.push([x,y]); });
+  if(Math.abs(w.w1) > 1e-9) [a,z].forEach(y => { const x = -(w.w2*y + w.b)/w.w1; if(x >= a-1e-9 && x <= z+1e-9) P.push([x,y]); });
+  let best = null, dm = 1e-6;
+  for(let i=0;i<P.length;i++) for(let j=i+1;j<P.length;j++){ const d = Math.hypot(P[i][0]-P[j][0], P[i][1]-P[j][1]); if(d > dm){ dm = d; best = [...P[i], ...P[j]]; } }
+  return best;
+}
+const errori = (w, P) => P.reduce((s,p) => s + (p.c*(w.w1*p.x + w.w2*p.y + w.b) <= 0 ? 1 : 0), 0);
+function disegnaPiano(t, g, dom, w, P, o){
+  const c = t.ctx, R = css("--scena-rosso"), Y = css("--scena-testo"), L = css("--scena-linea"), C = css("--scena-cornice"), T = css("--scena-tinta"), BG = css("--scena");
+  c.clearRect(0,0,t.W,t.H);
+  if(!o.senzaZona){
+    const n = 90, cs = g.s/n; c.fillStyle = T;
+    for(let i=0;i<n;i++) for(let j=0;j<n;j++){
+      const [x,y] = g.inv(g.ox + (i+.5)*cs, g.oy + (j+.5)*cs);
+      if(w.w1*x + w.w2*y + w.b > 0){ const x0 = Math.floor(g.ox + i*cs), y0 = Math.floor(g.oy + j*cs); c.fillRect(x0, y0, Math.floor(g.ox+(i+1)*cs)-x0, Math.floor(g.oy+(j+1)*cs)-y0); }
+    }
+  }
+  c.strokeStyle = L; c.lineWidth = 1;
+  const st = (dom[1]-dom[0])/8;
+  for(let v=dom[0]; v<=dom[1]+1e-9; v+=st){ c.beginPath(); c.moveTo(g.X(v),g.Y(dom[0])); c.lineTo(g.X(v),g.Y(dom[1])); c.stroke(); c.beginPath(); c.moveTo(g.X(dom[0]),g.Y(v)); c.lineTo(g.X(dom[1]),g.Y(v)); c.stroke(); }
+  c.strokeStyle = C; c.lineWidth = 1.5; c.strokeRect(g.ox, g.oy, g.s, g.s);
+  if(o.extra) o.extra(c, g);
+  if(o.etichette && o.assi){ c.fillStyle = C; c.font = "600 13px " + css("--ui"); c.textAlign = "right"; c.textBaseline = "top"; c.fillText("x\u2081", g.ox + g.s - 6, g.oy + g.s + 5); c.textAlign = "left"; c.textBaseline = "bottom"; c.fillText("x\u2082", g.ox - 18, g.oy + 14); }
+  const seg = o.senzaRetta ? null : segmento(w, dom);
+  if(seg){
+    c.strokeStyle = Y; c.lineWidth = 3; c.beginPath(); c.moveTo(g.X(seg[0]),g.Y(seg[1])); c.lineTo(g.X(seg[2]),g.Y(seg[3])); c.stroke();
+    const m2 = w.w1*w.w1 + w.w2*w.w2;
+    if(o.etichette && m2 > 1e-6){
+      const m = Math.sqrt(m2), px = (seg[0]+seg[2])/2, py = (seg[1]+seg[3])/2, Lg = (dom[1]-dom[0])*.11, qx = px + Lg*w.w1/m, qy = py + Lg*w.w2/m;
+      c.strokeStyle = R; c.fillStyle = R; c.lineWidth = 2.5; c.beginPath(); c.moveTo(g.X(px),g.Y(py)); c.lineTo(g.X(qx),g.Y(qy)); c.stroke();
+      const a = Math.atan2(g.Y(qy)-g.Y(py), g.X(qx)-g.X(px));
+      c.beginPath(); c.moveTo(g.X(qx),g.Y(qy)); c.lineTo(g.X(qx)-10*Math.cos(a-.45), g.Y(qy)-10*Math.sin(a-.45)); c.lineTo(g.X(qx)-10*Math.cos(a+.45), g.Y(qy)-10*Math.sin(a+.45)); c.fill();
+      c.font = "700 14px " + css("--ui"); c.textAlign = "left"; c.textBaseline = "alphabetic"; c.fillText("w", g.X(qx)+6, g.Y(qy)-6);
+    }
+  }
+  const r = o.raggio || 7;
+  P.forEach((p,i) => {
+    const X = g.X(p.x), Yp = g.Y(p.y), sb = !o.senzaRetta && p.c*(w.w1*p.x + w.w2*p.y + w.b) <= 0;
+    if(sb){ c.strokeStyle = R; c.lineWidth = 1.5; c.setLineDash([3,3]); c.beginPath(); c.arc(X,Yp,r+6,0,Math.PI*2); c.stroke(); c.setLineDash([]); }
+    c.beginPath(); c.arc(X,Yp,r,0,Math.PI*2);
+    if(p.c > 0){ c.fillStyle = R; c.fill(); } else { c.fillStyle = BG; c.fill(); c.strokeStyle = Y; c.lineWidth = 2.5; c.stroke(); }
+    if(o.ultimo === i){ c.strokeStyle = Y; c.lineWidth = 2; c.beginPath(); c.arc(X,Yp,r+11,0,Math.PI*2); c.stroke(); }
+  });
+}
+
+/* =========================================================
+   NEURONE 1943
+   ========================================================= */
+const N = { x1:1, x2:0, th:2 };
+const PORTE = { "0001":"AND", "0111":"OR", "1111":"sempre acceso", "0000":"sempre spento" };
+const usc = (a,b,th) => (a+b) >= th ? 1 : 0;
+let portaPrima = null;
+function firma(){ return [[0,0],[0,1],[1,0],[1,1]].map(([a,b]) => usc(a,b,N.th)).join(""); }
+function geoN(t){ const top = 86, bot = 96, h = t.H - top - bot, cy = top + h/2, r = Math.min(t.W*.075, h*.16); return { ix:t.W*.17, iy1:cy - h*.3, iy2:cy + h*.3, sx:t.W*.52, sy:cy, R:Math.min(t.W*.15, h*.33), ox:t.W*.84, r }; }
+const telaN = tela($("#tela-n"), t => {
+  const c = t.ctx, g = geoN(t), R = css("--scena-rosso"), Y = css("--scena-testo"), C = css("--scena-cornice"), BG = css("--scena"), F = css("--ui");
+  const z = N.x1 + N.x2, y = usc(N.x1,N.x2,N.th);
+  c.clearRect(0,0,t.W,t.H);
+  const filo = (a,b,cc,d,on) => { c.strokeStyle = on ? R : C; c.lineWidth = on ? 5 : 2.5; c.beginPath(); c.moveTo(a,b); c.lineTo(cc,d); c.stroke(); };
+  filo(g.ix, g.iy1, g.sx - g.R*.8, g.sy - g.R*.4, N.x1);
+  filo(g.ix, g.iy2, g.sx - g.R*.8, g.sy + g.R*.4, N.x2);
+  filo(g.sx + g.R, g.sy, g.ox, g.sy, y);
+  c.textAlign = "center"; c.textBaseline = "middle";
+  [[g.iy1,N.x1,"x\u2081"],[g.iy2,N.x2,"x\u2082"]].forEach(([yy,v,et]) => {
+    c.beginPath(); c.arc(g.ix,yy,g.r,0,Math.PI*2); c.fillStyle = v ? R : BG; c.fill(); c.lineWidth = 2.5; c.strokeStyle = v ? R : Y; c.stroke();
+    c.fillStyle = Y; c.font = "700 " + Math.round(g.r*.8) + "px " + F; c.fillText(String(v), g.ix, yy);
+    if(UI.etichette){ c.fillStyle = C; c.font = "600 " + Math.round(Math.max(12,g.r*.5)) + "px " + F; c.fillText(et, g.ix, yy - g.r - 12); }
+  });
+  c.beginPath(); c.arc(g.sx,g.sy,g.R,0,Math.PI*2); c.fillStyle = BG; c.fill(); c.lineWidth = 2.5; c.strokeStyle = z >= N.th ? R : Y; c.stroke();
+  c.fillStyle = Y; c.font = "700 " + Math.round(g.R*.36) + "px " + F; c.fillText("\u03a3 " + z, g.sx, g.sy - g.R*.25);
+  c.fillStyle = z >= N.th ? R : C; c.font = "600 " + Math.round(g.R*.24) + "px " + F; c.fillText((z >= N.th ? "\u2265 " : "< ") + "\u03b8 " + N.th, g.sx, g.sy + g.R*.32);
+  if(UI.etichette){ c.fillStyle = C; c.font = "600 " + Math.round(Math.max(12,g.r*.5)) + "px " + F; c.fillText("somma e soglia", g.sx, g.sy + g.R + 16); }
+  c.beginPath(); c.arc(g.ox,g.sy,g.r*1.2,0,Math.PI*2); c.fillStyle = y ? R : BG; c.fill(); c.lineWidth = 2.5; c.strokeStyle = y ? R : Y; c.stroke();
+  c.fillStyle = Y; c.font = "700 " + Math.round(g.r*.9) + "px " + F; c.fillText(String(y), g.ox, g.sy);
+  if(UI.etichette){ c.fillStyle = C; c.font = "600 " + Math.round(Math.max(12,g.r*.5)) + "px " + F; c.fillText("uscita y", g.ox, g.sy - g.r*1.2 - 12); }
+});
+function accendi(k){ N[k] = N[k] ? 0 : 1; annota("Neurone: x\u2081 = " + N.x1 + ", x\u2082 = " + N.x2 + ", somma " + (N.x1+N.x2) + ", uscita " + usc(N.x1,N.x2,N.th) + "."); aggiorna(); }
+function cambiaSoglia(v, el){
+  N.th = v; const p = PORTE[firma()];
+  if(p !== portaPrima){ annota("Neurone: con \u03b8 = " + v + " la tavola è " + (p.length < 4 ? "quella di " : "") + p + "."); if(p === "AND") S.and = true; if(p === "OR") S.or = true; salva(); }
+  portaPrima = p;
+  // aggiornamento leggero: il cursore non viene ricreato mentre lo si trascina
+  if(el) el.nextElementSibling.textContent = v;
+  const y = usc(N.x1,N.x2,N.th), pil = $("#sc-pillola"); pil.classList.toggle("accesa", !!y); pil.querySelector("span").textContent = y ? "Acceso" : "Spento";
+  $("#sc-lettura").textContent = "\u03a3 " + (N.x1+N.x2) + "   \u03b8 " + N.th;
+  const tb = $("#tavola-n tbody");
+  if(tb) tb.innerHTML = [[0,0],[0,1],[1,0],[1,1]].map(([a,b]) => { const u = usc(a,b,N.th); return '<tr'+(a===N.x1&&b===N.x2?' class="ora"':'')+'><td>'+a+'</td><td>'+b+'</td><td>'+(a+b)+'</td><td class="'+(u?"uno":"")+'">'+u+'</td></tr>'; }).join("");
+  const ob2 = $("#obiettivi-n"); if(ob2) ob2.innerHTML = ob("AND", S.and) + ob("OR", S.or);
+  const av = $('#scheda [data-az="avanti"]'); if(av && strumentoAttivo().attivo) av.disabled = !strumentoAttivo().attivo();
+  telaN.ridisegna();
+}
+$("#tela-n").addEventListener("pointerdown", e => {
+  const r = e.currentTarget.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top, g = geoN(telaN);
+  if(Math.hypot(x-g.ix, y-g.iy1) < g.r*1.6) accendi("x1"); else if(Math.hypot(x-g.ix, y-g.iy2) < g.r*1.6) accendi("x2");
+});
+
+/* =========================================================
+   PERCETTRONE 1958
+   ========================================================= */
+const DP = [-1,1], ETA = .15, LIMITE_P = 300;
+const P = { punti:[], w:{w1:0,w2:0,b:0}, passi:0, ptr:0, ultimo:-1, timer:null, classe:1, limite:false };
+function nuoviPunti(){
+  let A;
+  do{ const an = Math.random()*Math.PI, nx = Math.cos(an), ny = Math.sin(an), off = (Math.random()-.5)*.6; A = [];
+    while(A.length < 22){ const x = Math.random()*1.8-.9, y = Math.random()*1.8-.9, d = nx*x + ny*y + off; if(Math.abs(d) < .12) continue; A.push({x,y,c:d>0?1:-1}); }
+  } while(A.filter(q=>q.c>0).length < 6 || A.filter(q=>q.c<0).length < 6);
+  P.punti = A; P.limite = false; aggiornaLimiteP();
+}
+function nuovaRetta(){
+  let w, k = 0;
+  do{ w = { w1:Math.random()*2-1, w2:Math.random()*2-1, b:Math.random()-.5 }; k++; } while(errori(w,P.punti) < 4 && k < 400);
+  if(errori(w,P.punti) < 4) w = { w1:-w.w1, w2:-w.w2, b:-w.b };
+  P.w = w; P.passi = 0; P.ptr = 0; P.ultimo = -1; P.limite = false; aggiornaLimiteP();
+}
+const telaP = tela($("#tela-p"), t => { const g = geoPiano(t, DP, 60, 92); disegnaPiano(t, g, DP, P.w, P.punti, { ultimo:P.ultimo, etichette:UI.etichette, assi:true }); });
+function aggiornaLimiteP(){
+  const avviso = document.getElementById("limite-percettrone");
+  if(avviso) avviso.hidden = !(P.limite && UI.modello === "percettrone");
+}
+function raggiungiLimiteP(){
+  if(P.limite) return;
+  P.limite = true;
+  fermaP();
+  annota("Percettrone: 300 tentativi di correzione, ancora " + errori(P.w,P.punti) + " errori. L’addestramento si ferma.");
+  aggiornaLimiteP();
+  aggiorna();
+}
+function passoP(muto){
+  if(P.limite) return false;
+  if(P.passi >= LIMITE_P){
+    if(errori(P.w,P.punti) > 0) raggiungiLimiteP();
+    return false;
+  }
+  const A = P.punti, n = A.length;
+  for(let k=0;k<n;k++){
+    const i = (P.ptr+k) % n, q = A[i];
+    if(q.c*(P.w.w1*q.x + P.w.w2*q.y + P.w.b) <= 0){
+      const prima = errori(P.w,A);
+      P.w.w1 += ETA*q.c*q.x; P.w.w2 += ETA*q.c*q.y; P.w.b += ETA*q.c;
+      P.passi++; P.ptr = (i+1) % n; P.ultimo = i;
+      const dopo = errori(P.w,A);
+      if(!muto) annota("Percettrone, passo " + P.passi + ": corretto un punto " + (q.c>0?"rosso":"vuoto") + ". Errori " + prima + " \u2192 " + dopo + ".");
+      if(dopo > 0 && P.passi >= LIMITE_P) raggiungiLimiteP();
+      if(dopo === 0){ annota("Percettrone: tutti i punti separati in " + P.passi + " passi."); S.perc = true; salva(); fermaP(); }
+      aggiorna(); return true;
+    }
+  }
+  P.ultimo = -1; aggiorna(); return false;
+}
+function fermaP(){ if(P.timer){ clearInterval(P.timer); P.timer = null; } }
+function addestra(){
+  if(P.timer){ fermaP(); aggiorna(); return; }
+  if(P.limite) { aggiornaLimiteP(); return; }
+  if(errori(P.w,P.punti) === 0) return;
+  annota("Percettrone: addestramento avviato con " + errori(P.w,P.punti) + " errori.");
+  let giri = 0;
+  P.timer = setInterval(() => {
+    giri++; let ok = true; for(let k=0;k<(giri>50?4:1) && ok;k++) ok = passoP(true);
+    if(!ok || P.limite || errori(P.w,P.punti) === 0){
+      if(!P.limite && errori(P.w,P.punti) > 0) annota("Percettrone: fermo dopo " + P.passi + " passi con " + errori(P.w,P.punti) + " errori. I punti aggiunti a mano possono rendere i gruppi inseparabili.");
+      fermaP(); aggiorna();
+    }
+  }, 70);
+  aggiorna();
+}
+$("#tela-p").addEventListener("pointerdown", e => {
+  if(UI.strumento.percettrone !== "punti"){ UI.strumento.percettrone = "punti"; aggiorna(); return; }
+  const r = e.currentTarget.getBoundingClientRect(), g = geoPiano(telaP, DP, 60, 92), [x,y] = g.inv(e.clientX - r.left, e.clientY - r.top);
+  if(x < -1 || x > 1 || y < -1 || y > 1) return;
+  fermaP(); P.limite = false; P.passi = 0; P.ptr = 0; P.ultimo = -1; aggiornaLimiteP();
+  P.punti.push({x,y,c:P.classe}); annota("Percettrone: aggiunto un punto " + (P.classe>0?"rosso":"vuoto") + ". Errori " + errori(P.w,P.punti) + "."); aggiorna();
+});
+
+/* =========================================================
+   STRUMENTI E SCHEDE
+   ========================================================= */
+const UI = { modello:"neurone", strumento:{ neurone:"accendi", percettrone:"osserva" }, formule:false, etichette:true, scheda:"impara" };
+
+const STRUMENTI = {
+  neurone:[
+    { id:"accendi", nome:"Accendi", ic:"tocco", tit:"Accendi gli ingressi", testo:"Ogni ingresso vale 0 o 1. Un tocco sul cerchio lo accende o lo spegne.",
+      corpo:() => '<div class="riga"><button class="secondario" data-az="x1" aria-pressed="'+(N.x1?"true":"false")+'">x\u2081 = '+N.x1+'</button><button class="secondario" data-az="x2" aria-pressed="'+(N.x2?"true":"false")+'">x\u2082 = '+N.x2+'</button></div>',
+      avanti:{ nome:"Regola la soglia", ic:"soglia", fai:() => vaiStrumento("soglia") } },
+    { id:"soglia", nome:"Soglia", ic:"soglia", tit:"Sposta la soglia", testo:"Il neurone si accende quando la somma degli ingressi raggiunge \u03b8.",
+      corpo:() => '<label class="cursore"><span>\u03b8</span><input type="range" min="0" max="3" step="1" value="'+N.th+'" data-az="th" aria-label="Soglia"><output>'+N.th+'</output></label>',
+      avanti:{ nome:"Apri la tavola", ic:"tavola", fai:() => vaiStrumento("tavola") } },
+    { id:"tavola", nome:"Tavola", ic:"tavola", tit:"Trova le due porte", testo:"Tutte le combinazioni di ingressi, con la risposta del neurone. Cambiando \u03b8 la tavola si riscrive.",
+      corpo:() => {
+        let h = '<table class="tavola" id="tavola-n"><thead><tr><th>x\u2081</th><th>x\u2082</th><th>somma</th><th>y</th></tr></thead><tbody>';
+        [[0,0],[0,1],[1,0],[1,1]].forEach(([a,b]) => { const u = usc(a,b,N.th); h += '<tr'+(a===N.x1&&b===N.x2?' class="ora"':'')+'><td>'+a+'</td><td>'+b+'</td><td>'+(a+b)+'</td><td class="'+(u?"uno":"")+'">'+u+'</td></tr>'; });
+        h += '</tbody></table><label class="cursore"><span>\u03b8</span><input type="range" min="0" max="3" step="1" value="'+N.th+'" data-az="th" aria-label="Soglia"><output>'+N.th+'</output></label>';
+        h += '<div class="obiettivi" id="obiettivi-n">' + ob("AND", S.and) + ob("OR", S.or) + '</div>';
+        return h;
+      },
+      avanti:{ nome:"Passa al percettrone", ic:"piano", fai:() => vaiModello("percettrone") }, attivo:() => S.and && S.or }
+  ],
+  percettrone:[
+    { id:"osserva", nome:"Osserva", ic:"occhio", tit:"Guarda la retta", testo:"Il percettrone colora di rosso la sua metà del piano. I punti cerchiati stanno dalla parte sbagliata.",
+      corpo:() => '', avanti:{ nome:"Correggi un punto", ic:"passo", fai:() => vaiStrumento("passo") } },
+    { id:"passo", nome:"Un passo", ic:"passo", tit:"Una correzione alla volta", testo:"Ogni passo prende un punto sbagliato e sposta la retta verso di lui. A volte gli errori risalgono, prima di scendere.",
+      corpo:() => '<div class="riga"><button class="secondario" data-az="passo">'+icona("passo")+'Un passo</button></div>',
+      avanti:{ nome:"Lascia lavorare la regola", ic:"play", fai:() => vaiStrumento("addestra") } },
+    { id:"addestra", nome:"Addestra", ic:"play", tit:"La regola da sola", testo:"La correzione si ripete finché nessun punto è sbagliato. Se una retta che separa i gruppi esiste, la regola la trova.",
+      corpo:() => '<div class="riga"><button class="secondario" data-az="addestra">'+icona(P.timer?"pausa":"play")+(P.timer?"Fermati":"Addestra")+'</button><button class="secondario" data-az="nuovi">'+icona("punti")+'Nuovi punti</button></div>',
+      avanti:{ nome:"Metti alla prova il limite", ic:"bandiera", fai:() => vaiScheda("missione") }, attivo:() => S.perc },
+    { id:"pesi", nome:"Pesi", ic:"pesi", tit:"Muovi la retta a mano", testo:"La retta è dove w\u2081\u00b7x\u2081 + w\u2082\u00b7x\u2082 + b vale zero. I cursori la spostano.",
+      corpo:() => ["w1","w2","b"].map(k => '<label class="cursore"><span>'+({w1:"w\u2081",w2:"w\u2082",b:"b"})[k]+'</span><input type="range" min="-2" max="2" step="0.01" value="'+P.w[k]+'" data-az="peso" data-k="'+k+'" aria-label="'+k+'"><output>'+num(P.w[k])+'</output></label>').join("") },
+    { id:"punti", nome:"Aggiungi", ic:"aggiungi", tit:"Metti nuovi punti", testo:"Un tocco sul piano aggiunge un punto del colore scelto. Un punto nel posto sbagliato può rendere i gruppi inseparabili.",
+      corpo:() => '<div class="scelta" role="group" aria-label="Colore del punto"><button data-az="classe" data-c="1" aria-pressed="'+(P.classe>0)+'">Rosso</button><button data-az="classe" data-c="-1" aria-pressed="'+(P.classe<0)+'">Vuoto</button></div>' }
+  ]
+};
+function ob(nome, fatto){ return '<span class="obiettivo'+(fatto?" fatto":"")+'"><i>'+(fatto?icona("spunta"):"")+'</i>'+nome+'</span>'; }
+
+const CONCETTI = {
+  neurone:[["Ingresso","Un segnale che vale 0 o 1, spento o acceso."],["Somma","Il neurone conta quanti ingressi sono accesi."],["Soglia \u03b8","Il valore che la somma deve raggiungere perché il neurone si accenda."],["Porta logica","Una regola fissa che trasforma ingressi 0 e 1 in un’uscita. AND vuole entrambi gli ingressi accesi, OR ne vuole almeno uno."]],
+  percettrone:[["Peso","Quanto conta un ingresso. Può essere positivo, negativo o vicino a zero."],["Bias b","La soglia trasformata in un peso in più, che si impara come gli altri."],["Retta di separazione","I punti dove w\u2081\u00b7x\u2081 + w\u2082\u00b7x\u2082 + b vale zero. Da una parte il percettrone dice rosso, dall’altra vuoto."],["Regola di correzione","Quando un punto è sbagliato, i pesi si spostano di un pezzetto delle sue coordinate, verso il colore giusto."],["Convergenza","Se una retta che separa i due gruppi esiste, la regola ne trova una in un numero finito di passi. Lo dimostrò il matematico Albert Novikoff nel 1962."]]
+};
+const FORMULE = {
+  neurone:"z = x\u2081 + x\u2082<br>y = 1 se z \u2265 \u03b8, altrimenti 0",
+  percettrone:"z = w\u2081x\u2081 + w\u2082x\u2082 + b<br>rosso se z &gt; 0<br>se sbaglia: w \u2190 w \u00b1 \u03b7\u00b7x"
+};
+const STORIE = {
+  neurone:["Una cellula ridotta a una somma",
+    "<p>Nel 1943 un neurofisiologo di Chicago, Warren McCulloch, e un logico di vent’anni, Walter Pitts, pubblicarono un articolo che descriveva una cellula nervosa con due sole operazioni. Gli ingressi valgono 0 oppure 1, il neurone li somma e, se la somma raggiunge la soglia, si accende.</p><p>Con abbastanza unità di questo tipo, dimostrarono, si costruisce qualunque funzione logica. Il limite sta nella mano di chi regola il neurone: la soglia la sceglie chi progetta, e tutto quello che il modello sa gliel’ha messo dentro una persona. Per vedere una macchina che impara la soglia dagli esempi bisogna aspettare quindici anni.</p><p>Il modello originale prevedeva anche ingressi inibitori, capaci di spegnere il neurone da soli. Qui gli ingressi contano tutti allo stesso modo.</p>"],
+  percettrone:["La soglia diventa un peso",
+    "<p>Nel 1958 lo psicologo Frank Rosenblatt, al Cornell Aeronautical Laboratory, presentò il percettrone: un neurone con un peso per ogni ingresso e una regola per correggere quei pesi quando sbaglia. La soglia entra nel conto come un peso in più, il bias, e da quel momento la macchina la impara insieme a tutto il resto.</p><p>Quando i due gruppi si possono dividere con una retta, la regola ne trova una in un numero finito di passi. Lo dimostrò il matematico Albert Novikoff nel 1962.</p><p class='fonte'>La ricostruzione storica segue il giornalista scientifico Anil Ananthaswamy, <cite>Why Machines Learn. The Elegant Maths Behind Modern AI</cite>, Dutton/Penguin, 2024.</p>"],
+  missione:["Quattro punti e nessuna retta",
+    "<p>XOR si accende quando è acceso esattamente uno dei due ingressi. Sul piano i due punti che valgono 1 stanno su una diagonale, gli altri due sull’altra, e qualunque retta lascia almeno un punto dalla parte sbagliata.</p><p>Nel 1969 gli informatici del MIT Marvin Minsky e Seymour Papert pubblicarono <cite>Perceptrons</cite>, un libro che misurava con rigore matematico cosa un percettrone a uno strato riesce a calcolare. Molti storici gli attribuiscono il raffreddamento dei finanziamenti che seguì, il primo inverno delle AI, e il dibattito su quanto pesò davvero è ancora aperto.</p><p>Il rimedio era noto anche allora: due strati di neuroni risolvono XOR. Mancava un metodo per addestrare reti a più strati, e la sua diffusione arrivò quasi vent’anni dopo.</p>"]
+};
+
+function strumentoAttivo(){ return STRUMENTI[UI.modello].find(s => s.id === UI.strumento[UI.modello]); }
+function vaiStrumento(id){ UI.strumento[UI.modello] = id; aggiorna(); }
+function vaiModello(m){ UI.modello = m; fermaP(); aggiorna(); aggiornaLimiteP(); }
+
+function aggiorna(){
+  const neur = UI.modello === "neurone";
+  $$("[data-modello]").forEach(b => b.setAttribute("aria-pressed", b.dataset.modello === UI.modello ? "true" : "false"));
+  $("#tela-n").hidden = !neur; $("#tela-p").hidden = neur;
+  $("#scena").classList.toggle("bassa", neur);
+  // sovrimpressioni
+  $("#sc-nome").textContent = neur ? "Neurone di McCulloch e Pitts" : "Percettrone di Rosenblatt";
+  $("#sc-sotto").textContent = neur ? "Una somma e una soglia" : "Pesi che si correggono";
+  const pil = $("#sc-pillola");
+  if(neur){ const y = usc(N.x1,N.x2,N.th); pil.classList.toggle("accesa", !!y); pil.querySelector("span").textContent = y ? "Acceso" : "Spento"; }
+  else { const e = errori(P.w,P.punti); pil.classList.toggle("accesa", e > 0); pil.querySelector("span").textContent = e === 0 ? "Separati" : e === 1 ? "1 errore" : e + " errori"; }
+  $("#sc-lettura").textContent = neur ? "\u03a3 " + (N.x1+N.x2) + "   \u03b8 " + N.th : P.passi + (P.passi === 1 ? " passo" : " passi");
+  const f = $("#sc-formule"); f.hidden = !UI.formule; f.innerHTML = FORMULE[UI.modello];
+  const s = strumentoAttivo();
+  $("#sc-sugg").textContent = neur ? "Tocca un ingresso per accenderlo" : (s.id === "punti" ? "Tocca il piano per aggiungere un punto" : P.timer ? "La regola sta correggendo" : "La zona rossa è dove il percettrone dice rosso");
+  const cm = $("#sc-comandi");
+  cm.innerHTML = '<button data-az="reset" aria-label="Ripristina">' + icona("reset") + '</button>' + (neur ? '' : '<button data-az="passo" aria-label="Un passo">' + icona("passo") + '</button><button data-az="addestra" aria-label="' + (P.timer ? "Fermati" : "Addestra") + '">' + icona(P.timer ? "pausa" : "play") + '</button>');
+  // strumenti
+  $("#strumenti").innerHTML = STRUMENTI[UI.modello].map(t => '<button data-str="'+t.id+'" aria-pressed="'+(t.id===s.id)+'">'+icona(t.ic)+t.nome+'</button>').join("");
+  // scheda
+  let h = '<div class="ic">' + icona(s.ic) + '</div><h2>' + s.tit + '</h2><p>' + s.testo + '</p>' + s.corpo();
+  if(s.avanti){ const ok = !s.attivo || s.attivo(); h += '<button class="primario" data-az="avanti"' + (ok ? '' : ' disabled') + '>' + icona(s.avanti.ic) + s.avanti.nome + '</button>'; }
+  $("#scheda").innerHTML = h;
+  // concetti
+  $("#concetti").innerHTML = CONCETTI[UI.modello].map(([t,d]) => '<details class="voce"><summary><span class="pt"></span>'+t+icona("info")+'</summary><p>'+d+'</p></details>').join("");
+  $$('[data-extra="formule"]').forEach(b => b.setAttribute("aria-pressed", UI.formule));
+  $$('[data-extra="etichette"]').forEach(b => b.setAttribute("aria-pressed", UI.etichette));
+  (neur ? telaN : telaP).ridisegna();
+  aggiornaLimiteP();
+}
+
+/* azioni delegate */
+document.addEventListener("click", e => {
+  const b = e.target.closest("button"); if(!b) return;
+  if(b.dataset.modello){ vaiModello(b.dataset.modello); return; }
+  if(b.dataset.str){ vaiStrumento(b.dataset.str); return; }
+  if(b.dataset.extra){ UI[b.dataset.extra] = !UI[b.dataset.extra]; aggiorna(); return; }
+  if(b.hasAttribute("data-storia")){ apriStoria(UI.scheda === "missione" ? "missione" : UI.modello); return; }
+  if(b.dataset.vai){ vaiScheda(b.dataset.vai); return; }
+  if(b.dataset.scheda){ vaiScheda(b.dataset.scheda); return; }
+  const az = b.dataset.az; if(!az) return;
+  if(az === "x1" || az === "x2") accendi(az);
+  else if(az === "avanti"){ const s = strumentoAttivo(); if(s.avanti) s.avanti.fai(); }
+  else if(az === "passo"){ fermaP(); if(!passoP(false)) annota("Percettrone: nessun punto sbagliato."); }
+  else if(az === "addestra") addestra();
+  else if(az === "nuovi"){ fermaP(); nuoviPunti(); nuovaRetta(); annota("Percettrone: nuovi punti, la retta di partenza sbaglia " + errori(P.w,P.punti) + " volte."); aggiorna(); }
+  else if(az === "classe"){ P.classe = +b.dataset.c; aggiorna(); }
+  else if(az === "reset"){ if(UI.modello === "neurone"){ N.x1 = 1; N.x2 = 0; N.th = 2; portaPrima = PORTE[firma()]; aggiorna(); } else { fermaP(); nuovaRetta(); annota("Percettrone: nuova retta di partenza, " + errori(P.w,P.punti) + " errori."); aggiorna(); } }
+});
+document.addEventListener("input", e => {
+  const az = e.target.dataset && e.target.dataset.az;
+  if(az === "th"){ cambiaSoglia(+e.target.value, e.target); }
+  else if(az === "peso"){ fermaP(); P.w[e.target.dataset.k] = +e.target.value; P.ultimo = -1; e.target.nextElementSibling.textContent = num(P.w[e.target.dataset.k]); aggiornaLeggero(); }
+});
+document.addEventListener("change", e => { if(e.target.dataset && e.target.dataset.az === "peso") annota("Percettrone: retta spostata a mano, " + errori(P.w,P.punti) + " errori."); });
+function aggiornaLeggero(){ // non ridisegna la scheda, così il cursore resta afferrato
+  const e = errori(P.w,P.punti), pil = $("#sc-pillola"); pil.classList.toggle("accesa", e > 0); pil.querySelector("span").textContent = e === 0 ? "Separati" : e === 1 ? "1 errore" : e + " errori"; telaP.ridisegna();
+}
+
+/* =========================================================
+   MISSIONE XOR
+   ========================================================= */
+const DM = [-.5, 1.5], TAV = { AND:[0,0,0,1], OR:[0,1,1,1], XOR:[0,1,1,0] };
+const M = { porta:"XOR", scommessa:null, w:{w1:0,w2:0,b:0}, passi:0, ptr:0, min:null, timer:null, due:false, ultimo:-1, esito:"" };
+const puntiM = () => [[0,0],[0,1],[1,0],[1,1]].map(([a,b],i) => ({ x:a, y:b, c:TAV[M.porta][i] ? 1 : -1 }));
+function resetM(){ if(M.timer){ clearInterval(M.timer); M.timer = null; } M.w = { w1:(Math.random()-.5)*.4, w2:(Math.random()-.5)*.4, b:(Math.random()-.5)*.4 }; M.passi = 0; M.ptr = 0; M.min = null; M.due = false; M.ultimo = -1; M.esito = ""; aggiornaM(); }
+const telaM = tela($("#tela-m"), t => {
+  const g = geoPiano(t, DM, 60, 92);
+  const extra = M.due ? (c, g) => {
+    c.fillStyle = css("--scena-tinta"); c.beginPath();
+    [[-.5,1],[1,-.5],[1.5,-.5],[1.5,0],[0,1.5],[-.5,1.5]].forEach(([a,b],i) => i ? c.lineTo(g.X(a),g.Y(b)) : c.moveTo(g.X(a),g.Y(b)));
+    c.closePath(); c.fill(); c.strokeStyle = css("--scena-testo"); c.lineWidth = 3; c.setLineDash([9,6]);
+    [[-.5,1,1,-.5],[0,1.5,1.5,0]].forEach(s => { c.beginPath(); c.moveTo(g.X(s[0]),g.Y(s[1])); c.lineTo(g.X(s[2]),g.Y(s[3])); c.stroke(); }); c.setLineDash([]);
+  } : null;
+  disegnaPiano(t, g, DM, M.w, puntiM(), { raggio:12, ultimo:M.ultimo, extra, senzaRetta:M.due, senzaZona:M.due, etichette:true });
+  const c = t.ctx; c.fillStyle = css("--scena-cornice"); c.font = "600 13px " + css("--ui"); c.textAlign = "center"; c.textBaseline = "top";
+  [[0,0],[0,1],[1,0],[1,1]].forEach(([a,b]) => c.fillText("(" + a + ", " + b + ")", g.X(a), g.Y(b) + 20));
+});
+function passoM(){
+  const A = puntiM();
+  for(let k=0;k<4;k++){ const i = (M.ptr+k) % 4, q = A[i];
+    if(q.c*(M.w.w1*q.x + M.w.w2*q.y + M.w.b) <= 0){ M.w.w1 += .25*q.c*q.x; M.w.w2 += .25*q.c*q.y; M.w.b += .25*q.c; M.passi++; M.ptr = (i+1)%4; M.ultimo = i; const e = errori(M.w,A); M.min = M.min === null ? e : Math.min(M.min, e); return true; } }
+  M.min = 0; M.ultimo = -1; return false;
+}
+function corriM(){
+  if(M.timer || !M.scommessa) return;
+  M.passi = 0; M.ptr = 0; M.due = false; M.esito = ""; M.min = errori(M.w, puntiM());
+  annota("Missione " + M.porta + ": scommessa \u201c" + (M.scommessa === "si" ? "ci riesce" : "si blocca") + "\u201d.");
+  M.timer = setInterval(() => {
+    const ok = passoM();
+    if(!ok || M.passi >= 100){
+      clearInterval(M.timer); M.timer = null;
+      const riuscito = M.min === 0, vinta = riuscito === (M.scommessa === "si");
+      M.esito = (riuscito ? "Separati in " + M.passi + " passi." : "Dopo 100 passi gli errori non scendono a zero. La retta migliore possibile ne sbaglia uno.") + " Scommessa " + (vinta ? "vinta." : "persa.");
+      annota("Missione " + M.porta + ": " + M.esito);
+      if(M.porta === "XOR"){ S.xor = true; salva(); }
+    }
+    aggiornaM();
+  }, 55);
+  aggiornaM();
+}
+function aggiornaM(){
+  $$("[data-porta]").forEach(b => b.setAttribute("aria-pressed", b.dataset.porta === M.porta ? "true" : "false"));
+  $("#m-nome").textContent = "Porta " + M.porta;
+  const e = M.due ? 0 : errori(M.w, puntiM()), pil = $("#m-pillola");
+  pil.classList.toggle("accesa", e > 0); pil.querySelector("span").textContent = e === 0 ? "Separati" : e === 1 ? "1 errore" : e + " errori";
+  $("#m-lettura").textContent = M.due ? "due strati" : M.passi + (M.passi === 1 ? " passo" : " passi");
+  $("#m-sugg").textContent = M.due ? "Due rette tratteggiate chiudono una fascia" : M.timer ? "Il percettrone sta provando" : "Prima la scommessa, poi l’esperimento";
+  let h;
+  if(M.due){
+    h = '<div class="ic">' + icona("strati") + '</div><h2>Due strati</h2><p>Un neurone calcola OR, un altro NAND, un terzo si accende solo se lo sono entrambi. La fascia tra le due rette contiene esattamente i punti di XOR.</p><button class="secondario" data-mz="singolo">' + icona("piano") + 'Torna al percettrone singolo</button>';
+  } else if(M.esito){
+    h = '<div class="ic">' + icona("bandiera") + '</div><h2>' + (M.min === 0 ? "Ci è riuscito" : "Si è bloccato") + '</h2><p class="esito">' + M.esito + '</p><div class="riga"><button class="secondario" data-mz="ancora">' + icona("reset") + 'Riprova</button></div>' + (M.porta === "XOR" && M.min > 0 ? '<button class="primario" data-mz="due">' + icona("strati") + 'Prova con due strati</button>' : '<button class="primario" data-mz="xor">' + icona("bandiera") + 'Prova XOR</button>');
+  } else {
+    h = '<div class="ic">' + icona("bandiera") + '</div><h2>Fai la tua scommessa</h2><p>Un solo percettrone riuscirà a separare i punti rossi da quelli vuoti?</p><div class="riga"><button class="secondario" data-mz="si" aria-pressed="'+(M.scommessa==="si")+'">Sì, ci riesce</button><button class="secondario" data-mz="no" aria-pressed="'+(M.scommessa==="no")+'">No, si blocca</button></div><button class="primario" data-mz="via"' + (M.scommessa && !M.timer ? '' : ' disabled') + '>' + icona("play") + (M.timer ? "Sta provando" : "Addestra per 100 passi") + '</button>';
+  }
+  $("#scheda-m").innerHTML = h;
+  telaM.ridisegna();
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest("button"); if(!b) return;
+  if(b.dataset.porta){ if(M.timer) return; M.porta = b.dataset.porta; M.scommessa = null; resetM(); return; }
+  const z = b.dataset.mz; if(!z) return;
+  if(z === "si" || z === "no"){ M.scommessa = z; aggiornaM(); }
+  else if(z === "via") corriM();
+  else if(z === "ancora"){ M.scommessa = null; resetM(); }
+  else if(z === "xor"){ M.porta = "XOR"; M.scommessa = null; resetM(); }
+  else if(z === "due"){ M.due = true; annota("Missione XOR: con due strati nessun errore."); aggiornaM(); }
+  else if(z === "singolo"){ M.due = false; aggiornaM(); }
+});
+
+/* =========================================================
+   QUIZ, una domanda alla volta
+   ========================================================= */
+const DOM = [
+  { q:"La soglia vale 1, x\u2081 è spento e x\u2082 è acceso. Cosa fa il neurone?", o:["Si accende","Resta spento","Dipende dall’ordine degli ingressi"], g:0, s:"La somma vale 1 e raggiunge la soglia. Con \u03b8 = 1 il neurone è una porta OR." },
+  { q:"Con due ingressi porti la soglia a 3. Cosa ottieni?", o:["Una porta AND","Una porta OR","Un neurone sempre spento","Una porta XOR"], g:2, s:"Con due ingressi la somma arriva al massimo a 2 e non raggiunge mai 3." },
+  { q:"Il percettrone corregge un punto rosso sbagliato. Cosa succede di sicuro?", o:["Il punto passa subito dalla parte giusta","Il punto si avvicina alla parte giusta","Gli altri punti restano tutti dove erano","La retta resta ferma"], g:1, s:"Su quel punto il valore di z cresce. Può servire più di un passo, e intanto altri punti possono cambiare lato." },
+  { q:"Due gruppi si possono separare con una retta. Cosa garantisce la regola?", o:["Trova una retta che li separa","Trova la retta migliore possibile","Può girare per sempre","Ha bisogno di due strati"], g:0, s:"Il teorema di Novikoff garantisce una retta qualsiasi che separa i gruppi, in un numero finito di passi. La retta migliore è un altro problema." },
+  { q:"Sui quattro punti di XOR, quanti errori fa come minimo la retta migliore?", o:["Zero","Uno","Due","Tre"], g:1, s:"La retta migliore sistema tre punti su quattro. Nessuna retta li sistema tutti." }
+];
+
+DOM.push(
+{q:"Con x₁ = 1, x₂ = 1 e soglia θ = 2, quale uscita produce il neurone?",o:["0","1","Non si può sapere"],g:1,s:"La somma è 2: raggiunge la soglia e l’uscita vale 1."},
+{q:"Con x₁ = 0, x₂ = 0 e soglia θ = 1, che cosa accade?",o:["Si accende","Resta spento","Impara una nuova soglia"],g:1,s:"La somma è 0, inferiore alla soglia 1."},
+{q:"Che cosa indica x₁ nello schema del neurone?",o:["Un ingresso","La soglia","L’uscita"],g:0,s:"x₁ è il primo segnale in ingresso; x₂ è il secondo."},
+{q:"Che cosa rappresenta θ?",o:["Un peso","La soglia","Il numero di esempi"],g:1,s:"θ è il valore che la somma deve raggiungere per attivare l’uscita."},
+{q:"Nella porta AND a due ingressi, quando l’uscita vale 1?",o:["Con almeno un ingresso acceso","Con entrambi accesi","Quando entrambi sono spenti"],g:1,s:"AND richiede due ingressi accesi contemporaneamente."},
+{q:"Nella porta OR a due ingressi, quando l’uscita vale 1?",o:["Quando almeno un ingresso è acceso","Solo con entrambi accesi","Solo quando sono diversi"],g:0,s:"OR si attiva se almeno uno dei due ingressi è acceso."},
+{q:"Qual è l’uscita di XOR quando x₁ = 1 e x₂ = 1?",o:["1","0","Dipende dal peso"],g:1,s:"XOR vale 1 solo quando esattamente uno dei due ingressi vale 1."},
+{q:"Qual è l’uscita di XOR quando x₁ = 0 e x₂ = 1?",o:["0","1","Non definita"],g:1,s:"Gli ingressi sono diversi: XOR vale 1."},
+{q:"Che cosa fa il peso w₁?",o:["Regola il contributo di x₁","Conta gli errori","Accende sempre l’uscita"],g:0,s:"w₁ moltiplica il primo ingresso e ne determina il contributo alla somma."},
+{q:"Che cosa fa il bias b nel percettrone?",o:["Elimina i dati","Sposta la soglia della decisione","Conta i passi"],g:1,s:"Il bias è un termine aggiunto alla somma e sposta il confine della decisione."},
+{q:"Che cosa significa addestrare un percettrone?",o:["Cambiare i pesi usando gli errori","Aumentare sempre la soglia","Disegnare punti a caso"],g:0,s:"L’addestramento corregge i pesi quando la previsione è sbagliata."},
+{q:"Se un percettrone separa tutti i punti, quanti errori restano?",o:["Uno","Zero","Dipende dal colore"],g:1,s:"Separazione completa significa nessun punto classificato in modo errato."},
+{q:"Perché un singolo percettrone non risolve XOR?",o:["Mancano esempi","Non esiste una retta che separi i due gruppi","Ha troppi ingressi"],g:1,s:"I punti di XOR sono disposti sulle diagonali opposte: una sola retta non basta."},
+{q:"Che cosa aggiungono due strati nel caso di XOR?",o:["La possibilità di combinare più separazioni","Una soglia fissa per sempre","L’assenza di pesi"],g:0,s:"Più neuroni e strati possono combinare confini diversi e rappresentare XOR."},
+{q:"Che differenza fondamentale c’è tra i due modelli della lezione?",o:["Il neurone ha più ingressi","Il percettrone può correggere i pesi dagli esempi","Il percettrone non ha uscita"],g:1,s:"Il neurone semplificato segue una regola fissata; il percettrone aggiorna i propri parametri."}
+);
+const QUIZ_SIZE=7;
+function estraiQuiz(){const a=DOM.map((_,i)=>i);for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a.slice(0,QUIZ_SIZE).map(i=>DOM[i]);}
+
+const Q = { i:0, giuste:0, risposto:false, domande:estraiQuiz() };
+function disegnaQuiz(){
+  const sc = $("#q-scheda");
+  if(Q.i >= Q.domande.length){
+    $("#q-barra").style.width = "100%";
+    sc.innerHTML = '<div class="ic">' + icona("quiz") + '</div><h2>' + Q.giuste + ' su ' + Q.domande.length + '</h2><p>' + (Q.giuste === Q.domande.length ? "Tutte giuste." : "Le domande sbagliate si possono ripassare sul banco.") + '</p><button class="primario" data-qz="rifai">' + icona("reset") + 'Rifai il quiz</button>';
+    return;
+  }
+  $("#q-barra").style.width = (Q.i/Q.domande.length*100) + "%";
+  const d = Q.domande[Q.i];
+  let h = '<p style="color:var(--tenue);margin:0 0 .3rem">Domanda ' + (Q.i+1) + ' di ' + Q.domande.length + '</p><h2>' + d.q + '</h2><div class="risposte">';
+  d.o.forEach((t,j) => { h += '<button data-qr="' + j + '">' + t + '</button>'; });
+  h += '</div><div id="q-dopo"></div>';
+  sc.innerHTML = h; Q.risposto = false;
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest("button"); if(!b) return;
+  if(b.dataset.qr !== undefined && !Q.risposto){
+    Q.risposto = true; const d = Q.domande[Q.i], j = +b.dataset.qr;
+    if(j === d.g) Q.giuste++;
+    $$("[data-qr]").forEach(x => { x.disabled = true; if(+x.dataset.qr === d.g) x.classList.add("giusta"); else if(x === b) x.classList.add("sbagliata"); });
+    $("#q-dopo").innerHTML = '<p>' + (j === d.g ? "<b>Giusto.</b> " : "") + d.s + '</p><button class="primario" data-qz="avanti">' + icona("passo") + (Q.i === Q.domande.length-1 ? "Vedi il risultato" : "Avanti") + '</button>';
+    if(Q.i === Q.domande.length-1){ S.quiz = Q.giuste; salva(); }
+  } else if(b.dataset.qz === "avanti"){ Q.i++; disegnaQuiz(); }
+  else if(b.dataset.qz === "rifai"){ Q.i = 0; Q.giuste = 0; Q.domande=estraiQuiz(); disegnaQuiz(); }
+});
+
+/* =========================================================
+   INDICE E NAVIGAZIONE
+   ========================================================= */
+function aggiornaIndice(){
+  const fatti = [S.and && S.or, S.perc, S.xor];
+  $("#segmenti").innerHTML = fatti.map(f => '<i class="' + (f ? "fatto" : "") + '"></i>').join("");
+  const n = fatti.filter(Boolean).length;
+  $("#vai-lezione").innerHTML = icona("play") + (n === 0 ? "Inizia" : n === 3 ? "Ripassa" : "Continua");
+  $("#numeri").innerHTML = '<span>Concetti <b>' + n + ' di 39</b></span><span>Quiz <b>' + (S.quiz === null ? "da fare" : S.quiz + " su 7") + '</b></span><span>Mosse <b>' + S.mosse + '</b></span>';
+  let c = ""; for(let k=1;k<=13;k++) c += '<li><b>' + k + '</b>' + (k === 1 ? "Il neurone che decide" : "In preparazione") + '</li>';
+  $("#corso").innerHTML = c;
+}
+function vaiScheda(s){
+  UI.scheda = s;
+  $$("[data-scheda]").forEach(b => b.setAttribute("aria-selected", b.dataset.scheda === s ? "true" : "false"));
+  $$("[data-pannello]").forEach(p => p.hidden = p.dataset.pannello !== s);
+  if(s !== "prova") fermaP();
+  if(s !== "impara") stopIntro(false);
+  if(s === "missione") aggiornaM(); else if(s === "quiz") disegnaQuiz(); else if(s === "prova") aggiorna(); else if(s === "impara") mostraIntro(imparaModello,true); else if(s === "pratica") disegnaPratica();
+  window.scrollTo(0,0);
+}
+function instrada(){
+  const lez = location.hash === "#lezione-1";
+  $("#vista-indice").hidden = lez; $("#vista-lezione").hidden = !lez; $("#schede").hidden = !lez;
+  if(lez){ aggiorna(); vaiScheda("impara"); }
+  else { fermaP(); aggiornaIndice(); }
+  window.scrollTo(0,0);
+}
+function apri(d){ if(typeof d.showModal === "function") d.showModal(); else d.setAttribute("open",""); }
+function apriStoria(k){ $("#storia-t").textContent = STORIE[k][0]; $("#storia-testo").innerHTML = STORIE[k][1]; apri($("#storia")); }
+$$("[data-guida]").forEach(b => b.addEventListener("click", () => apri($("#guida"))));
+$("#chiudi-storia").addEventListener("click", e => { e.preventDefault(); const d=$("#storia"); if(typeof d.close === "function") d.close(); else d.removeAttribute("open"); });
+window.addEventListener("hashchange", instrada);
+document.addEventListener("keydown", e => {
+  if($("#vista-lezione").hidden || document.querySelector("dialog[open]")) return;
+  const tag = (e.target.tagName||"").toLowerCase(); if(tag === "input" || tag === "button") return;
+  if(e.key === " " && UI.scheda === "prova" && UI.modello === "percettrone"){ e.preventDefault(); fermaP(); passoP(false); }
+});
+const ridisegnaTutto = () => { telaN.ridisegna(); telaP.ridisegna(); telaM.ridisegna(); };
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ridisegnaTutto);
+if(document.fonts) document.fonts.ready.then(ridisegnaTutto);
+
+
+/* Microsequenze narrative: disegno 2.5D su canvas, nessuna modifica agli stati delle simulazioni. */
+const introBox = $("#intro-lab"), introCanvas = $("#intro-canvas"), introCtx = introCanvas.getContext("2d");
+const introReduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+const introCopy = {
+ neurone: [
+  "Gli ingressi x₁ e x₂ possono essere accesi (1) o spenti (0).",
+  "I segnali x₁ e x₂ raggiungono il corpo centrale. La somma Σ li raccoglie.",
+  "La soglia θ vale 2: se Σ raggiunge 2, l’uscita y diventa 1.",
+  "La regola è fissa. Ora puoi provarla tu."
+ ],
+ percettrone: [
+  "Il percettrone riceve gli ingressi x₁ e x₂, come il neurone.",
+  "I pesi w₁ e w₂ regolano quanto contano x₁ e x₂. Il bias b sposta la soglia.",
+  "Confronta l’uscita y con il risultato atteso. Se sbaglia, corregge w₁, w₂ e b.",
+  "Il neurone segue una regola. Il percettrone può imparare a cambiarla."
+ ]
+};
+let introState = null, introFrame = 0, imparaModello="neurone";
+const INTRO_DURATION=10000;
+function stopIntro(){introState=null;cancelAnimationFrame(introFrame);introBox.hidden=true;}
+function mostraIntro(m){
+ stopIntro(); imparaModello=m;
+ if(UI.scheda!=="impara")return;
+ introState={modello:m,inizio:performance.now(),step:-1,paused:false,hold:0};
+ introBox.hidden=false;
+ $$('[data-impara-modello]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.imparaModello===m)));
+ $("#intro-kicker").textContent=m==="neurone"?"1943 · McCulloch e Pitts":"1958 · Rosenblatt";
+ $("#intro-title").textContent=m==="neurone"?"Come decide un neurone":"Come impara un percettrone";
+ $("#intro-start").hidden=true;$("#intro-skip").hidden=false;
+ $("#intro-pause").textContent="Pausa";$("#intro-pause").setAttribute("aria-pressed","false");
+ introFrame=requestAnimationFrame(drawIntro);
+}
+function introSeek(step){if(!introState)return;introState.inizio=performance.now()-Math.max(0,Math.min(3,step))*INTRO_DURATION;introState.step=-1;introState.hold=0;introState.paused=false;$("#intro-pause").textContent="Pausa";$("#intro-pause").setAttribute("aria-pressed","false");cancelAnimationFrame(introFrame);introFrame=requestAnimationFrame(drawIntro)}
+function introPause(){if(!introState)return;const st=introState;if(st.step===3 && !st.paused && performance.now()-st.inizio>=INTRO_DURATION*4){introSeek(0);return;}st.paused=!st.paused;if(st.paused){st.hold=performance.now()-st.inizio;cancelAnimationFrame(introFrame)}else{st.inizio=performance.now()-st.hold;introFrame=requestAnimationFrame(drawIntro)}$("#intro-pause").textContent=st.paused?"Riprendi":"Pausa";$("#intro-pause").setAttribute("aria-pressed",String(st.paused))}
+$$('[data-impara-modello]').forEach(b=>b.addEventListener('click',()=>mostraIntro(b.dataset.imparaModello)));
+$("#intro-restart").addEventListener("click",()=>introSeek(0));
+$("#intro-prev").addEventListener('click',()=>introSeek(Math.max(0,(introState?.step||0)-1)));
+$("#intro-next").addEventListener('click',()=>introSeek(Math.min(3,(introState?.step||0)+1)));
+$("#intro-pause").addEventListener('click',introPause);
+$("#intro-skip").addEventListener('click',()=>{vaiScheda('prova');vaiModello(imparaModello)});
+$("#intro-start").addEventListener('click',()=>{vaiScheda('prova');vaiModello(imparaModello)});
+function introRounded(c,x,y,w,h,r){c.beginPath();c.roundRect(x,y,w,h,r)}
+function introNode(c,x,y,r,on,label){
+ c.save();c.shadowColor="rgba(0,0,0,.7)";c.shadowBlur=18;c.shadowOffsetY=7;c.beginPath();c.arc(x,y,r+4,0,Math.PI*2);c.fillStyle="#11090d";c.fill();c.restore();
+ const rim=c.createLinearGradient(x-r,y-r,x+r,y+r);rim.addColorStop(0,"#e1d1af");rim.addColorStop(.5,"#645259");rim.addColorStop(1,"#b7a38e");c.beginPath();c.arc(x,y,r+2,0,Math.PI*2);c.fillStyle=rim;c.fill();
+ const face=c.createRadialGradient(x-r*.35,y-r*.38,0,x,y,r*1.3);face.addColorStop(0,on?"#ffa7a3":"#4d3239");face.addColorStop(.6,on?"#d02d39":"#352127");face.addColorStop(1,on?"#8d1726":"#1b1015");c.beginPath();c.arc(x,y,r-2,0,Math.PI*2);c.fillStyle=face;c.fill();
+ if(on){c.save();c.shadowColor="#d02d39";c.shadowBlur=24;c.strokeStyle="#e76570";c.lineWidth=2;c.stroke();c.restore()}
+ c.beginPath();c.arc(x-r*.2,y-r*.25,r*.5,3.55,5.1);c.strokeStyle="rgba(255,255,255,.43)";c.lineWidth=2;c.stroke();
+ c.fillStyle="#f0edba";c.textAlign="center";c.textBaseline="middle";c.font="bold "+Math.max(13,r*.74)+"px system-ui";c.fillText(label,x,y+1);
+}
+function introWire(c,a,b,x,y,on,pulse){
+ const mx=(a+x)/2;c.save();c.beginPath();c.moveTo(a,b);c.bezierCurveTo(mx,b,mx,y,x,y);c.lineCap="round";c.strokeStyle="#120b0e";c.lineWidth=12;c.stroke();c.strokeStyle=on?"#ac2a38":"#827078";c.lineWidth=7;c.stroke();c.strokeStyle=on?"#f16b76":"#d5c4ab";c.lineWidth=2;c.stroke();
+ if(pulse>=0&&pulse<=1){let q=1-pulse,px=q*q*q*a+3*q*q*pulse*mx+3*q*pulse*pulse*mx+pulse*pulse*pulse*x,py=q*q*q*b+3*q*q*pulse*b+3*q*pulse*pulse*y+pulse*pulse*pulse*y;c.shadowColor="#f16b76";c.shadowBlur=24;c.beginPath();c.arc(px,py,5,0,Math.PI*2);c.fillStyle="#fff4c7";c.fill()}
+ c.restore();
+}
+function drawIntro(now){
+ const st=introState;if(!st)return;
+ const box=introCanvas.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2),W=Math.max(1,Math.round(box.width*dpr)),H=Math.max(1,Math.round(box.height*dpr));
+ if(introCanvas.width!==W||introCanvas.height!==H){introCanvas.width=W;introCanvas.height=H}
+ const c=introCtx;c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,box.width,box.height);
+ const duration=introReduced.matches?0:INTRO_DURATION,elapsed=st.paused?st.hold:now-st.inizio,step=duration?Math.min(3,Math.floor(elapsed/duration)):3,progress=duration?Math.min(1,step===3?Math.max(0,(elapsed-3*duration)/duration):(elapsed%duration)/duration):1;
+ if(step!==st.step){st.step=step;$("#intro-progress").querySelectorAll("i").forEach((el,i)=>el.classList.toggle("on",i<step));}
+ const final=step===3;
+ const text=introCopy[st.modello][step];
+ const letters=introReduced.matches?text.length:Math.min(text.length,Math.floor(Math.max(0,progress-.08)*duration/55));
+ $("#intro-copy").textContent=text.slice(0,letters);
+ $("#intro-progress").querySelectorAll("i").forEach((el,i)=>{el.style.setProperty('--fill',i<step?'100%':i===step?(progress*100)+'%':'0%')});
+ $("#intro-tempo").textContent=(step+1)+" / 4";
+ $("#intro-prev").disabled=step===0;$("#intro-next").disabled=step===3;
+ $("#intro-start").hidden=!final||letters<text.length;$("#intro-skip").hidden=false;
+ const w=box.width,h=box.height;
+ // The layout matches the same hardware proportions and shadows as the interactive simulation.
+ const sc=Math.min(w/520,h/240,1.18),cx=w*.49,cy=h*.51,r=30*sc,R=58*sc,ix=cx-180*sc,sx=cx,ox=cx+185*sc,iy1=cy-72*sc,iy2=cy+72*sc;
+ const glow=c.createRadialGradient(cx,cy,0,cx,cy,w*.5);glow.addColorStop(0,"rgba(208,45,57,.15)");glow.addColorStop(1,"rgba(208,45,57,0)");c.fillStyle=glow;c.fillRect(0,0,w,h);
+ const per=st.modello==="percettrone",a=step>=1?1:0,b=step>=2?1:0,active=per?step>=2:step>=2;
+ const wire1=per?1:a,wire2=per?1:b;
+ introWire(c,ix,iy1,sx-R*.9,cy-R*.38,wire1,step===0?progress:-1);
+ introWire(c,ix,iy2,sx-R*.9,cy+R*.38,wire2,step===2?progress:-1);
+ introWire(c,sx+R,cy,ox-r,cy,active,step===2?Math.max(0,(progress-.5)*2):-1);
+ introNode(c,ix,iy1,r,wire1,String(wire1));introNode(c,ix,iy2,r,wire2,String(wire2));
+ introNode(c,sx,cy,R,active,per?(step<1?"Σ":"Σ + b"):(step>=2?"Σ 2":step>=1?"Σ 1":"Σ 0"));introNode(c,ox,cy,r*1.1,active,active?"1":"0");
+ c.fillStyle="#d8c6a6";c.font="600 "+Math.max(11,13*sc)+"px system-ui";c.textAlign="center";
+ c.fillText("x₁",ix,iy1-r-14*sc);c.fillText("x₂",ix,iy2-r-14*sc);c.fillText("uscita y",ox,cy-r*1.2-15*sc);
+ if(per){
+  // Weight modules appear on the wires, then change as the learning rule corrects them.
+  const f=step===0?Math.min(1,progress*2):1;
+  c.save();c.globalAlpha=f;
+  for(const [j,yy] of [[0,iy1],[1,iy2]]){
+   const px=ix+85*sc,py=yy+(cy-yy)*.35;
+   introRounded(c,px-27*sc,py-15*sc,54*sc,30*sc,12*sc);c.fillStyle="#43262c";c.fill();c.strokeStyle="#d6baa6";c.lineWidth=1.5;c.stroke();c.fillStyle="#f0edba";c.font="bold "+Math.max(12,14*sc)+"px system-ui";c.fillText("w"+(j+1),px,py+1);
+   if(step>=2){c.strokeStyle="#e85c66";c.lineWidth=2;c.beginPath();c.arc(px,py,20*sc,0,Math.PI*2);c.stroke();}
+  }c.restore();
+  if(step>=2){c.fillStyle="#f0edba";c.font="600 "+Math.max(11,12*sc)+"px system-ui";c.fillText("I pesi si correggono",sx,cy+R+25*sc);}
+ }else{c.fillStyle="#d8c6a6";c.font="600 "+Math.max(11,12*sc)+"px system-ui";c.fillText("soglia θ = 2",sx,cy+R+25*sc);}
+ if(!st.paused && (!final || letters<text.length || progress<1))introFrame=requestAnimationFrame(drawIntro);
+}
+
+
+function disegnaPratica(){
+ for(const [id,weighted] of [["pratica-neurone",false],["pratica-percettrone",true]]){
+  const el=document.getElementById(id);if(!el)continue;const rect=el.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2);if(!rect.width||!rect.height)continue;el.width=Math.round(rect.width*dpr);el.height=Math.round(rect.height*dpr);const c=el.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);const w=rect.width,h=rect.height,sc=Math.min(w/410,h/240),cx=w*.51,cy=h*.5,r=24*sc,R=42*sc,ix=cx-132*sc,ox=cx+132*sc;
+  introWire(c,ix,cy-48*sc,cx-R,cy-R*.4,true,-1);introWire(c,ix,cy+48*sc,cx-R,cy+R*.4,weighted,false);introWire(c,cx+R,cy,ox-r,cy,weighted,-1);
+  introNode(c,ix,cy-48*sc,r,true,'1');introNode(c,ix,cy+48*sc,r,weighted,weighted?'1':'0');introNode(c,cx,cy,R,weighted,weighted?'Σ + b':'Σ 1');introNode(c,ox,cy,r,weighted,weighted?'1':'0');
+  c.fillStyle='#f0edba';c.textAlign='center';c.font='600 12px system-ui';c.fillText('x₁',ix,cy-48*sc-r-10);c.fillText('x₂',ix,cy+48*sc-r-10);c.fillText('uscita y',ox,cy-r-13);if(weighted){c.fillText('w₁',ix+55*sc,cy-40*sc);c.fillText('w₂',ix+55*sc,cy+42*sc)}else c.fillText('θ = 2',cx,cy+R+18*sc);
+ }
+}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-pratica]');if(!b)return;vaiScheda('prova');vaiModello(b.dataset.pratica);});
+window.addEventListener('resize',()=>{if(UI.scheda==='pratica')disegnaPratica()});
+
+nuoviPunti(); nuovaRetta(); portaPrima = PORTE[firma()];
+disegnaQuaderno(); resetM(); disegnaQuiz(); instrada();
+})();
+</script>
+</body>
+</html>
